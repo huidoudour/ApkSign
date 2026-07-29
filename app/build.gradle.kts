@@ -112,6 +112,19 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    packaging {
+        resources {
+            excludes += setOf(
+                "META-INF/LICENSE*",
+                "META-INF/NOTICE*",
+                "META-INF/versions/**",
+                "META-INF/BC1024KE.SF",
+                "META-INF/BC1024KE.DSA",
+                "META-INF/BC2048KE.SF",
+                "META-INF/BC2048KE.DSA"
+            )
+        }
+    }
 }
 
 dependencies {
@@ -119,6 +132,11 @@ dependencies {
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
     implementation(libs.material)
+    implementation(libs.compose.ui.tooling)
+    implementation(libs.recyclerview)
+    implementation(libs.apksig)
+    implementation(libs.bcprov)
+    implementation(libs.bcpkix)
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)

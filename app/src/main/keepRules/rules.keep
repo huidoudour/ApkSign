@@ -10,3 +10,13 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+# ── BouncyCastle：Provider 通过反射注册算法/KeyStore 实现，必须整体保留 ──
+-keep class org.bouncycastle.jcajce.provider.** { *; }
+-keep class org.bouncycastle.jce.provider.** { *; }
+-dontwarn org.bouncycastle.**
+-dontwarn javax.naming.**
+
+# ── apksig：内部使用反射与 SPI，直接整体保留 ──
+-keep class com.android.apksig.** { *; }
+-dontwarn com.android.apksig.**

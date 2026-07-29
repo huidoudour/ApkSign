@@ -1,4 +1,65 @@
 <resources>
     <string name="app_name">ApkSign</string>
-    <string name="dis_name">安装包签名</string>
+    <string name="dis_name">签名工具</string>
+
+    <!-- 主页 -->
+    <string name="title_apk">APK 文件</string>
+    <string name="btn_select_apk">选择 APK</string>
+    <string name="apk_not_selected">未选择文件</string>
+    <string name="title_keystore">签名密钥</string>
+    <string name="btn_manage_keystore">管理密钥</string>
+    <string name="no_keystore_hint">暂无密钥配置，请先到"管理密钥"中导入或生成</string>
+    <string name="title_scheme">签名方案</string>
+    <string name="scheme_v1">v1 (JAR 签名)</string>
+    <string name="scheme_v2">v2</string>
+    <string name="scheme_v3">v3</string>
+    <string name="btn_sign">开始签名</string>
+    <string name="title_log">日志</string>
+    <string name="toast_select_apk_first">请先选择 APK 文件</string>
+    <string name="toast_select_keystore_first">请先选择签名密钥</string>
+    <string name="toast_select_scheme_first">请至少勾选一种签名方案</string>
+    <string name="sign_success">签名成功，耗时 %1$d ms</string>
+    <string name="sign_failed">签名失败: %1$s</string>
+
+    <!-- 密钥管理页 -->
+    <string name="title_keystore_manager">密钥管理</string>
+    <string name="empty_keystore_list">还没有密钥配置\n点右下角 + 导入或生成</string>
+    <string name="action_import">导入密钥库</string>
+    <string name="action_generate">生成新密钥</string>
+    <string name="action_export">导出</string>
+    <string name="action_delete">删除</string>
+    <string name="delete_confirm_title">删除密钥配置</string>
+    <string name="delete_confirm_msg">确定删除配置"%1$s"吗？私有目录内的密钥库文件也会一并删除，此操作不可恢复。</string>
+    <string name="export_success">导出成功</string>
+    <string name="export_failed">导出失败: %1$s</string>
+
+    <!-- 导入对话框 -->
+    <string name="dialog_import_title">导入密钥库</string>
+    <string name="btn_pick_keystore">选择密钥库文件 (JKS/BKS/P12)</string>
+    <string name="hint_store_password">密钥库密码</string>
+    <string name="btn_load_aliases">读取别名</string>
+    <string name="hint_key_alias">密钥别名</string>
+    <string name="hint_key_password">别名密码（PKCS12 通常与库密码相同）</string>
+    <string name="hint_config_name">配置名称</string>
+    <string name="import_load_success">加载成功 (%1$s)，请选择别名</string>
+    <string name="import_load_failed">加载失败: %1$s</string>
+    <string name="import_no_key_alias">该密钥库中没有私钥条目</string>
+    <string name="import_success">导入成功</string>
+    <string name="import_verify_failed">校验失败: %1$s</string>
+    <string name="btn_ok">确定</string>
+    <string name="btn_cancel">取消</string>
+
+    <!-- 生成对话框 -->
+    <string name="dialog_generate_title">生成新密钥</string>
+    <string name="hint_gen_alias">密钥别名</string>
+    <string name="hint_gen_password">密码（库密码与别名密码相同）</string>
+    <string name="hint_gen_cn">名称 CN（必填）</string>
+    <string name="hint_gen_o">组织 O（选填）</string>
+    <string name="hint_gen_ou">组织单元 OU（选填）</string>
+    <string name="hint_gen_validity">有效期（年）</string>
+    <string name="label_gen_algorithm">算法</string>
+    <string name="generate_success">生成成功</string>
+    <string name="generate_failed">生成失败: %1$s</string>
+    <string name="field_required">此项必填</string>
+    <string name="generating">正在生成密钥...</string>
 </resources>

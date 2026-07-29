@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
+        android:name=".App"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -21,7 +22,27 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- 支持从文件管理器打开/分享 APK 直接进入签名 -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="application/vnd.android.package-archive" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="application/vnd.android.package-archive" />
+            </intent-filter>
         </activity>
+        <activity
+            android:name=".KeystoreManagerActivity"
+            android:exported="false"
+            android:label="@string/title_keystore_manager"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>
