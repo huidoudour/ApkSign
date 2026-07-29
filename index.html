@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApkSign - Android APK 签名工具</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="nav" role="navigation" aria-label="导航">
+    <a href="#features">功能特性</a>
+    <a href="#tech">技术栈</a>
+    <a href="#build">构建</a>
+</nav>
+
+<main>
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-icon" aria-hidden="true">AS</div>
+            <h1>ApkSign</h1>
+            <p>一个简洁的 Android 端 APK 签名工具，基于 Google 官方 apksig 库实现</p>
+            <div class="hero-tags">
+                <span class="tag">APK 签名</span>
+                <span class="tag">密钥管理</span>
+                <span class="tag tag-outline">Material You</span>
+                <span class="tag tag-outline">开源</span>
+            </div>
+        </div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- Features -->
+    <section class="section" id="features">
+        <div class="container">
+            <h2 class="section-title">功能特性</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <h3>📦 APK 签名</h3>
+                    <p>支持 v1 / v2 / v3 签名方案，可自由勾选组合，满足不同 Android 版本的签名需求</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔑 密钥管理</h3>
+                    <p>导入 JKS / BKS / PKCS12 密钥库，或在应用内直接生成新密钥，支持导出</p>
+                </div>
+                <div class="feature-card">
+                    <h3>⚡ 快速签名</h3>
+                    <p>从其他应用分享 APK 时，弹出简洁对话框直接完成签名，无需进入主界面</p>
+                </div>
+                <div class="feature-card">
+                    <h3>📲 签名后安装</h3>
+                    <p>签名完成后可选择系统中任意安装器直接安装产物，一步到位</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- Tech Stack -->
+    <section class="section" id="tech">
+        <div class="container">
+            <h2 class="section-title">技术栈</h2>
+            <div class="badge-list">
+                <span class="badge"><span class="badge-dot"></span>Java + Gradle KTS</span>
+                <span class="badge"><span class="badge-dot"></span>AGP 9.x</span>
+                <span class="badge"><span class="badge-dot"></span>minSdk 29</span>
+                <span class="badge"><span class="badge-dot"></span>targetSdk 36</span>
+                <span class="badge"><span class="badge-dot"></span>apksig</span>
+                <span class="badge"><span class="badge-dot"></span>Bouncy Castle</span>
+                <span class="badge"><span class="badge-dot"></span>Material 3</span>
+            </div>
+        </div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- Build -->
+    <section class="section" id="build">
+        <div class="container">
+            <h2 class="section-title">构建</h2>
+            <div class="feature-card" style="padding:16px 20px">
+                <p style="font-size:.875rem;color:var(--text-secondary);margin-bottom:8px">环境要求：JDK 21、Android SDK 36</p>
+                <pre class="code-block">./gradlew :app:assembleDebug</pre>
+            </div>
+        </div>
+    </section>
+</main>
+
+<hr class="divider">
+
+<footer class="footer">
+    <div class="container">
+        <p>
+            <a href="https://github.com/huidoudour/ApkSign" target="_blank" rel="noopener">GitHub</a>
+            &nbsp;·&nbsp;
+            <a href="https://github.com/huidoudour/ApkSign/blob/main/LICENSE" target="_blank" rel="noopener">Apache 2.0</a>
+        </p>
+        <p style="margin-top:8px">ApkSign &copy; 2026</p>
+    </div>
+</footer>
+
+<script src="js/main.js" defer></script>
+</body>
+</html>
