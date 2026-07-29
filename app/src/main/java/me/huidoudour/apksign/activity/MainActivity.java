@@ -14,6 +14,7 @@ import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -51,6 +52,7 @@ import me.huidoudour.apksign.ui.InstallerPickerDialog;
 public class MainActivity extends AppCompatActivity {
 
     private static final String PREF_LAST_CONFIG = "last_config_id";
+    private static final String PREF_ASKED_STORAGE = "asked_storage_perm";
 
     private KeystoreRepository repository;
     private List<KeystoreConfig> configs = new ArrayList<>();
@@ -103,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         // Android 10 的传统写权限申请（11+ 走设置页的所有文件访问权限）
         requestWritePermLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(), granted -> {
-                    if (granted) startSign();
+                    if (granted && apkUri != null) startSign();
                 });
 
         findViewById(R.id.btn_select_apk).setOnClickListener(v ->
@@ -113,7 +115,22 @@ public class MainActivity extends AppCompatActivity {
         btnSign.setOnClickListener(v -> startSign());
         btnInstall.setOnClickListener(v -> requestInstall());
 
+        // 选中即记住，避免 onResume 刷新列表后跳回第一项
+        spinnerKeystore.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position >= 0 && position < configs.size()) {
+                    getPrefs().edit().putString(PREF_LAST_CONFIG, configs.get(position).id).apply();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
         handleIncomingIntent(getIntent());
+        maybeRequestStorageOnFirstRun();
     }
 
     @Override
@@ -177,12 +194,12 @@ public class MainActivity extends AppCompatActivity {
         tvNoKeystore.setVisibility(empty ? View.VISIBLE : View.GONE);
         spinnerKeystore.setVisibility(empty ? View.GONE : View.VISIBLE);
 
-        // 恢复上次使用的配置
+        // 恢复上次选中的配置（setSelection(i, false) 不触发一次多余回调）
         String lastId = getPrefs().getString(PREF_LAST_CONFIG, null);
         if (lastId != null) {
             for (int i = 0; i < configs.size(); i++) {
                 if (configs.get(i).id.equals(lastId)) {
-                    spinnerKeystore.setSelection(i);
+                    spinnerKeystore.setSelection(i, false);
                     break;
                 }
             }
@@ -218,7 +235,12 @@ public class MainActivity extends AppCompatActivity {
             new MaterialAlertDialogBuilder(this)
                     .setTitle(R.string.perm_dialog_title)
                     .setMessage(getString(R.string.perm_dialog_msg, sourceDir.getAbsolutePath()))
-                    .setPositiveButton(R.string.perm_go_grant, (d, w) -> requestWriteExternal())
+                    .setPositiveButton(R.string.perm_go_grant, (d, w) -> {
+                        requestWriteExternal();
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            Toast.makeText(this, R.string.perm_granted_retry, Toast.LENGTH_LONG).show();
+                        }
+                    })
                     .setNegativeButton(R.string.perm_use_download, (d, w) -> signToDownloads(outName))
                     .show();
             return;
@@ -334,6 +356,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /** 首次启动时引导授予存储权限（只弹一次，拒绝后签名时仍有兜底引导） */
+    private void maybeRequestStorageOnFirstRun() {
+        if (canWriteExternal() || getPrefs().getBoolean(PREF_ASKED_STORAGE, false)) return;
+        getPrefs().edit().putBoolean(PREF_ASKED_STORAGE, true).apply();
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.first_run_perm_title)
+                .setMessage(R.string.first_run_perm_msg)
+                .setPositiveButton(R.string.perm_go_grant, (d, w) -> requestWriteExternal())
+                .setNegativeButton(R.string.btn_cancel, null)
+                .show();
+    }
+
     private boolean canWriteExternal() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             return Environment.isExternalStorageManager();
@@ -350,7 +384,6 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 startActivity(new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION));
             }
-            Toast.makeText(this, R.string.perm_granted_retry, Toast.LENGTH_LONG).show();
         } else {
             requestWritePermLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }

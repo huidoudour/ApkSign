@@ -29,6 +29,8 @@
     <string name="perm_go_grant">去授权</string>
     <string name="perm_use_download">存到下载目录</string>
     <string name="perm_granted_retry">授权后请再次点击"开始签名"</string>
+    <string name="first_run_perm_title">授予存储权限</string>
+    <string name="first_run_perm_msg">为了把签名结果直接存回原 APK 所在目录，需要"所有文件访问权限"。\n\n现在去授权吗？也可以稍后在签名时再授权，未授权时结果会存到下载目录。</string>
 
     <!-- 请求安装 -->
     <string name="btn_request_install">请求安装</string>
