@@ -1,4 +1,4 @@
-package me.huidoudour.apksign;
+package me.huidoudour.apksign.activity;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -44,6 +44,7 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import me.huidoudour.apksign.R;
 import me.huidoudour.apksign.keystore.KeyGenHelper;
 import me.huidoudour.apksign.keystore.KeystoreConfig;
 import me.huidoudour.apksign.keystore.KeystoreHelper;

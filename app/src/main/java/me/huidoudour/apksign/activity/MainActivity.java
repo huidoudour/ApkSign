@@ -1,11 +1,18 @@
-package me.huidoudour.apksign;
+package me.huidoudour.apksign.activity;
 
+import android.Manifest;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -18,21 +25,28 @@ import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import me.huidoudour.apksign.R;
 import me.huidoudour.apksign.keystore.KeystoreConfig;
 import me.huidoudour.apksign.keystore.KeystoreRepository;
 import me.huidoudour.apksign.signer.ApkSignTask;
+import me.huidoudour.apksign.signer.UriPathResolver;
+import me.huidoudour.apksign.ui.InstallerPickerDialog;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -47,13 +61,18 @@ public class MainActivity extends AppCompatActivity {
     private Spinner spinnerKeystore;
     private CheckBox cbV1, cbV2, cbV3;
     private Button btnSign;
+    private Button btnInstall;
     private LinearProgressIndicator progress;
 
     private Uri apkUri;
     private String apkDisplayName;
 
+    // 最近一次签名成功的产物（Uri 与文件路径二选一）
+    private Uri signedOutputUri;
+    private File signedOutputFile;
+
     private ActivityResultLauncher<String[]> pickApkLauncher;
-    private ActivityResultLauncher<String> createOutputLauncher;
+    private ActivityResultLauncher<String> requestWritePermLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,19 +95,23 @@ public class MainActivity extends AppCompatActivity {
         cbV2 = findViewById(R.id.cb_v2);
         cbV3 = findViewById(R.id.cb_v3);
         btnSign = findViewById(R.id.btn_sign);
+        btnInstall = findViewById(R.id.btn_install);
         progress = findViewById(R.id.progress);
 
         pickApkLauncher = registerForActivityResult(
                 new ActivityResultContracts.OpenDocument(), this::onApkPicked);
-        createOutputLauncher = registerForActivityResult(
-                new ActivityResultContracts.CreateDocument("application/vnd.android.package-archive"),
-                this::onOutputCreated);
+        // Android 10 的传统写权限申请（11+ 走设置页的所有文件访问权限）
+        requestWritePermLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(), granted -> {
+                    if (granted) startSign();
+                });
 
         findViewById(R.id.btn_select_apk).setOnClickListener(v ->
                 pickApkLauncher.launch(new String[]{"*/*"}));
         findViewById(R.id.btn_manage_keystore).setOnClickListener(v ->
                 startActivity(new Intent(this, KeystoreManagerActivity.class)));
         btnSign.setOnClickListener(v -> startSign());
+        btnInstall.setOnClickListener(v -> requestInstall());
 
         handleIncomingIntent(getIntent());
     }
@@ -182,19 +205,56 @@ public class MainActivity extends AppCompatActivity {
         String outName = apkDisplayName.endsWith(".apk")
                 ? apkDisplayName.substring(0, apkDisplayName.length() - 4) + "-signed.apk"
                 : apkDisplayName + "-signed.apk";
-        createOutputLauncher.launch(outName);
+
+        // 优先尝试存回原文件所在目录（需能解析出真实路径且持有存储权限）
+        File sourceFile = UriPathResolver.resolve(this, apkUri);
+        File sourceDir = sourceFile != null ? sourceFile.getParentFile() : null;
+        if (sourceDir != null && sourceDir.canRead()) {
+            if (canWriteExternal()) {
+                File outputFile = uniqueFile(sourceDir, outName);
+                doSign(null, outputFile, outputFile.getAbsolutePath());
+                return;
+            }
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.perm_dialog_title)
+                    .setMessage(getString(R.string.perm_dialog_msg, sourceDir.getAbsolutePath()))
+                    .setPositiveButton(R.string.perm_go_grant, (d, w) -> requestWriteExternal())
+                    .setNegativeButton(R.string.perm_use_download, (d, w) -> signToDownloads(outName))
+                    .show();
+            return;
+        }
+        signToDownloads(outName);
     }
 
-    private void onOutputCreated(Uri outputUri) {
-        if (outputUri == null) return;
+    /** 回退方案：写入公共下载目录 Download/ApkSign/ */
+    private void signToDownloads(String outName) {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Downloads.DISPLAY_NAME, outName);
+        values.put(MediaStore.Downloads.MIME_TYPE, "application/vnd.android.package-archive");
+        values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/ApkSign");
+        values.put(MediaStore.Downloads.IS_PENDING, 1);
+        Uri outputUri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+        if (outputUri == null) {
+            Toast.makeText(this, R.string.output_create_failed, Toast.LENGTH_LONG).show();
+            return;
+        }
+        doSign(outputUri, null, Environment.DIRECTORY_DOWNLOADS + "/ApkSign/" + outName);
+    }
+
+    private void doSign(Uri outputUri, File outputFile, String locationLabel) {
         KeystoreConfig config = configs.get(spinnerKeystore.getSelectedItemPosition());
         getPrefs().edit().putString(PREF_LAST_CONFIG, config.id).apply();
+
+        // 新一轮签名开始，隐藏上一轮的安装入口
+        signedOutputUri = null;
+        signedOutputFile = null;
+        btnInstall.setVisibility(View.GONE);
 
         setBusy(true);
         appendLog("开始签名: " + apkDisplayName + " → 密钥[" + config.name + "]");
         ApkSignTask.run(this, apkUri, config,
                 cbV1.isChecked(), cbV2.isChecked(), cbV3.isChecked(),
-                outputUri, new ApkSignTask.Callback() {
+                outputUri, outputFile, new ApkSignTask.Callback() {
                     @Override
                     public void onProgress(String message) {
                         appendLog(message);
@@ -202,14 +262,33 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onSuccess(long elapsedMs) {
+                        if (outputUri != null) {
+                            // 清除 IS_PENDING，让文件对其他应用可见
+                            ContentValues done = new ContentValues();
+                            done.put(MediaStore.Downloads.IS_PENDING, 0);
+                            getContentResolver().update(outputUri, done, null, null);
+                        }
                         setBusy(false);
+                        signedOutputUri = outputUri;
+                        signedOutputFile = outputFile;
+                        btnInstall.setVisibility(View.VISIBLE);
                         String msg = getString(R.string.sign_success, elapsedMs);
                         appendLog(msg);
+                        appendLog(getString(R.string.sign_output_path, locationLabel));
                         Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
                     }
 
                     @Override
                     public void onError(Throwable error) {
+                        // 失败时清理占位的输出条目/残留文件
+                        try {
+                            if (outputUri != null) getContentResolver().delete(outputUri, null, null);
+                            if (outputFile != null && outputFile.exists()) {
+                                //noinspection ResultOfMethodCallIgnored
+                                outputFile.delete();
+                            }
+                        } catch (Exception ignored) {
+                        }
                         setBusy(false);
                         String msg = getString(R.string.sign_failed,
                                 error.getMessage() != null ? error.getMessage() : error.toString());
@@ -222,6 +301,59 @@ public class MainActivity extends AppCompatActivity {
     private void setBusy(boolean busy) {
         btnSign.setEnabled(!busy);
         progress.setVisibility(busy ? View.VISIBLE : View.GONE);
+    }
+
+    /** 签名成功后的"请求安装"：弹出安装器选择对话框 */
+    private void requestInstall() {
+        Uri installUri = null;
+        if (signedOutputFile != null) {
+            if (signedOutputFile.isFile()) {
+                // 文件路径产物通过 FileProvider 转成可授权的 content Uri
+                installUri = FileProvider.getUriForFile(this,
+                        getPackageName() + ".fileprovider", signedOutputFile);
+            }
+        } else {
+            installUri = signedOutputUri;
+        }
+        if (installUri == null) {
+            btnInstall.setVisibility(View.GONE);
+            Toast.makeText(this, R.string.install_output_missing, Toast.LENGTH_LONG).show();
+            return;
+        }
+        InstallerPickerDialog.show(this, installUri);
+    }
+
+    /** 目标目录下同名时自动追加序号，避免覆盖 */
+    private static File uniqueFile(File dir, String name) {
+        File f = new File(dir, name);
+        if (!f.exists()) return f;
+        String base = name.endsWith(".apk") ? name.substring(0, name.length() - 4) : name;
+        for (int i = 1; ; i++) {
+            f = new File(dir, base + "(" + i + ").apk");
+            if (!f.exists()) return f;
+        }
+    }
+
+    private boolean canWriteExternal() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            return Environment.isExternalStorageManager();
+        }
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestWriteExternal() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            try {
+                startActivity(new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                        Uri.parse("package:" + getPackageName())));
+            } catch (Exception e) {
+                startActivity(new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION));
+            }
+            Toast.makeText(this, R.string.perm_granted_retry, Toast.LENGTH_LONG).show();
+        } else {
+            requestWritePermLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
     }
 
     private void appendLog(String message) {

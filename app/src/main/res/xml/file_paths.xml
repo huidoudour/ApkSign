@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- 签名产物可能位于外部存储任意目录（存回原目录场景），供安装器读取 -->
+    <external-path
+        name="external"
+        path="." />
+    <root-path
+        name="root"
+        path="" />
+</paths>

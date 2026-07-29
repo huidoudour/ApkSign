@@ -20,6 +20,22 @@
     <string name="toast_select_scheme_first">请至少勾选一种签名方案</string>
     <string name="sign_success">签名成功，耗时 %1$d ms</string>
     <string name="sign_failed">签名失败: %1$s</string>
+    <string name="sign_output_path">已保存到 %1$s</string>
+    <string name="output_create_failed">创建输出文件失败</string>
+
+    <!-- 存回原目录 -->
+    <string name="perm_dialog_title">存回原目录需要授权</string>
+    <string name="perm_dialog_msg">已定位到原文件目录：\n%1$s\n\n把签名结果存回该目录需要"所有文件访问权限"，也可以本次先存到下载目录。</string>
+    <string name="perm_go_grant">去授权</string>
+    <string name="perm_use_download">存到下载目录</string>
+    <string name="perm_granted_retry">授权后请再次点击"开始签名"</string>
+
+    <!-- 请求安装 -->
+    <string name="btn_request_install">请求安装</string>
+    <string name="installer_dialog_title">选择安装器</string>
+    <string name="installer_none_found">未找到可用的安装器</string>
+    <string name="installer_launch_failed">无法启动所选安装器</string>
+    <string name="install_output_missing">签名产物不存在，请重新签名</string>
 
     <!-- 密钥管理页 -->
     <string name="title_keystore_manager">密钥管理</string>

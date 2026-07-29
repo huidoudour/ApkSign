@@ -1,7 +1,14 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
+    <!-- Android 12+ 由 DynamicColors 覆盖为系统取色，以下为 12 以下的蓝色回退 -->
     <style name="Base.Theme.ApkSign" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="colorPrimary">@color/blue_primary_night</item>
+        <item name="colorOnPrimary">@color/blue_on_primary_night</item>
+        <item name="colorPrimaryContainer">@color/blue_primary_container_night</item>
+        <item name="colorOnPrimaryContainer">@color/blue_on_primary_container_night</item>
+        <item name="colorSecondary">@color/blue_secondary_night</item>
+        <item name="colorOnSecondary">@color/blue_on_secondary_night</item>
+        <item name="colorSecondaryContainer">@color/blue_secondary_container_night</item>
+        <item name="colorOnSecondaryContainer">@color/blue_on_secondary_container_night</item>
     </style>
 </resources>

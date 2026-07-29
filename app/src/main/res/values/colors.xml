@@ -2,4 +2,23 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Android 12 以下无动态取色时的回退配色（蓝色系） -->
+    <color name="blue_primary">#1565C0</color>
+    <color name="blue_on_primary">#FFFFFF</color>
+    <color name="blue_primary_container">#D7E3FF</color>
+    <color name="blue_on_primary_container">#001B3F</color>
+    <color name="blue_secondary">#545F71</color>
+    <color name="blue_on_secondary">#FFFFFF</color>
+    <color name="blue_secondary_container">#D8E3F8</color>
+    <color name="blue_on_secondary_container">#111C2B</color>
+
+    <color name="blue_primary_night">#A9C7FF</color>
+    <color name="blue_on_primary_night">#003063</color>
+    <color name="blue_primary_container_night">#084689</color>
+    <color name="blue_on_primary_container_night">#D7E3FF</color>
+    <color name="blue_secondary_night">#BCC7DB</color>
+    <color name="blue_on_secondary_night">#263141</color>
+    <color name="blue_secondary_container_night">#3C4758</color>
+    <color name="blue_on_secondary_container_night">#D8E3F8</color>
 </resources>

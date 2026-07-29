@@ -2,6 +2,8 @@ package me.huidoudour.apksign;
 
 import android.app.Application;
 
+import com.google.android.material.color.DynamicColors;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.security.Security;
@@ -18,5 +20,7 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        // Android 12+ 启用系统动态取色（Monet），低版本自动回退到主题内的蓝色配色
+        DynamicColors.applyToActivitiesIfAvailable(this);
     }
 }

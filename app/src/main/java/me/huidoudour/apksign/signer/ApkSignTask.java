@@ -21,7 +21,7 @@ import me.huidoudour.apksign.keystore.KeystoreRepository;
 
 /**
  * 后台执行 APK 签名：
- * 输入 Uri → cache 临时文件 → apksig 签名 → 写出到输出 Uri。
+ * 输入 Uri → cache 临时文件 → apksig 签名 → 写出到输出 Uri 或目标文件。
  */
 public class ApkSignTask {
 
@@ -36,9 +36,13 @@ public class ApkSignTask {
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
 
+    /**
+     * @param outputUri  输出目标（MediaStore/SAF），与 outputFile 二选一
+     * @param outputFile 输出目标（直接文件路径，需已持有存储权限）
+     */
     public static void run(Context context, Uri apkUri, KeystoreConfig config,
                            boolean v1, boolean v2, boolean v3,
-                           Uri outputUri, Callback callback) {
+                           Uri outputUri, File outputFile, Callback callback) {
         Context app = context.getApplicationContext();
         EXECUTOR.execute(() -> {
             long start = System.currentTimeMillis();
@@ -80,7 +84,9 @@ public class ApkSignTask {
                 // 4. 写出结果
                 post(callback, "正在保存输出文件...");
                 try (InputStream in = new FileInputStream(outFile);
-                     OutputStream out = app.getContentResolver().openOutputStream(outputUri, "wt")) {
+                     OutputStream out = outputFile != null
+                             ? new java.io.FileOutputStream(outputFile)
+                             : app.getContentResolver().openOutputStream(outputUri, "wt")) {
                     if (out == null) throw new java.io.IOException("无法写入输出文件");
                     copy(in, out);
                 }
