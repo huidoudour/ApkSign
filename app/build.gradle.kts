@@ -122,4 +122,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
+
+    // MTDataFilesProvider
+    //noinspection UseTomlInstead
+    debugImplementation("com.github.L-JINBIN:MTDataFilesProvider:v1.0.0")
 }
