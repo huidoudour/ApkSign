@@ -45,7 +45,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- 支持从文件管理器打开/分享 APK 直接进入签名 -->
+            <!-- 支持从文件管理器打开 APK 直接进入签名 -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -53,6 +53,15 @@
 
                 <data android:mimeType="application/vnd.android.package-archive" />
             </intent-filter>
+        </activity>
+
+        <!-- 分享发起的签名：透明承接，弹简洁对话框完成签名，不进主界面 -->
+        <activity
+            android:name=".activity.ShareSignActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:label="@string/share_sign_title"
+            android:theme="@style/Theme.ApkSign.Translucent">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 

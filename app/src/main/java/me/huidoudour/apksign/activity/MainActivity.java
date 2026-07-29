@@ -145,14 +145,12 @@ public class MainActivity extends AppCompatActivity {
         refreshConfigs();
     }
 
-    /** 支持从文件管理器 "打开方式/分享" 传入 APK */
+    /** 支持从文件管理器 "打开方式" 传入 APK（分享入口由 ShareSignActivity 承接） */
     private void handleIncomingIntent(Intent intent) {
         if (intent == null) return;
         Uri uri = null;
         if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             uri = intent.getData();
-        } else if (Intent.ACTION_SEND.equals(intent.getAction())) {
-            uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
         }
         if (uri != null) onApkPicked(uri);
     }

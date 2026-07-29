@@ -39,6 +39,14 @@
     <string name="installer_launch_failed">无法启动所选安装器</string>
     <string name="install_output_missing">签名产物不存在，请重新签名</string>
 
+    <!-- 分享快速签名对话框 -->
+    <string name="share_sign_title">快速签名</string>
+    <string name="share_sign_read_failed">未能获取分享的 APK 文件</string>
+    <string name="scheme_v1_short">v1</string>
+    <string name="btn_go_manage">去管理密钥</string>
+    <string name="btn_install">安装</string>
+    <string name="btn_done">完成</string>
+
     <!-- 密钥管理页 -->
     <string name="title_keystore_manager">密钥管理</string>
     <string name="empty_keystore_list">还没有密钥配置\n点右下角 + 导入或生成</string>

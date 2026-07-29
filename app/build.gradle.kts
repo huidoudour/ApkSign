@@ -143,5 +143,5 @@ dependencies {
 
     // MTDataFilesProvider
     //noinspection UseTomlInstead
-    debugImplementation("com.github.L-JINBIN:MTDataFilesProvider:v1.0.0")
+    implementation("com.github.L-JINBIN:MTDataFilesProvider:v1.0.0")
 }
