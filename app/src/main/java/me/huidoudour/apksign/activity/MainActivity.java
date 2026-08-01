@@ -73,7 +73,10 @@ public class MainActivity extends AppCompatActivity {
     private Uri signedOutputUri;
     private File signedOutputFile;
 
-    private ActivityResultLauncher<String[]> pickApkLauncher;
+    /** 文件管理器包名 */
+    private static final String FILE_MANAGER_PACKAGE = "me.huidoudour.file.manager";
+
+    private ActivityResultLauncher<Intent> pickApkLauncher;
     private ActivityResultLauncher<String> requestWritePermLauncher;
 
     @Override
@@ -101,7 +104,12 @@ public class MainActivity extends AppCompatActivity {
         progress = findViewById(R.id.progress);
 
         pickApkLauncher = registerForActivityResult(
-                new ActivityResultContracts.OpenDocument(), this::onApkPicked);
+                new ActivityResultContracts.StartActivityForResult(), result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Uri uri = result.getData().getData();
+                        if (uri != null) onApkPicked(uri);
+                    }
+                });
         // Android 10 的传统写权限申请（11+ 走设置页的所有文件访问权限）
         requestWritePermLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(), granted -> {
@@ -109,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
                 });
 
         findViewById(R.id.btn_select_apk).setOnClickListener(v ->
-                pickApkLauncher.launch(new String[]{"*/*"}));
+                pickApkLauncher.launch(buildPickApkIntent()));
         findViewById(R.id.btn_manage_keystore).setOnClickListener(v ->
                 startActivity(new Intent(this, KeystoreManagerActivity.class)));
         btnSign.setOnClickListener(v -> startSign());
@@ -153,6 +161,23 @@ public class MainActivity extends AppCompatActivity {
             uri = intent.getData();
         }
         if (uri != null) onApkPicked(uri);
+    }
+
+    /**
+     * 构建文件选取 Intent：优先使用自有 FileManager，未安装则回退到系统 SAF。
+     */
+    private Intent buildPickApkIntent() {
+        Intent fmIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        fmIntent.addCategory(Intent.CATEGORY_OPENABLE);
+        fmIntent.setType("*/*");
+        fmIntent.setPackage(FILE_MANAGER_PACKAGE);
+        if (fmIntent.resolveActivity(getPackageManager()) != null) {
+            return fmIntent;
+        }
+        // FileManager 未安装，回退到系统 SAF 文件选择器
+        return new Intent(Intent.ACTION_OPEN_DOCUMENT)
+                .addCategory(Intent.CATEGORY_OPENABLE)
+                .setType("*/*");
     }
 
     private void onApkPicked(Uri uri) {

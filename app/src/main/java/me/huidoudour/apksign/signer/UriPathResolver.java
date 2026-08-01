@@ -16,6 +16,9 @@ import java.util.List;
  */
 public class UriPathResolver {
 
+    /** 自有文件管理器 FileProvider 的 authority */
+    private static final String FILE_MANAGER_AUTHORITY = "me.huidoudour.file.manager.fileprovider";
+
     public static File resolve(Context context, Uri uri) {
         if (uri == null) return null;
         if ("file".equals(uri.getScheme())) {
@@ -25,6 +28,13 @@ public class UriPathResolver {
         if (!"content".equals(uri.getScheme())) return null;
 
         long expectedSize = querySize(context, uri);
+
+        // 0. 自有 FileManager 的 FileProvider URI（优先使用自己 App）
+        File fmFile = resolveFileManagerUri(uri);
+        if (fmFile != null) {
+            File f = validate(fmFile, expectedSize);
+            if (f != null) return f;
+        }
 
         // 1. SAF 文档 Uri（系统文件选择器 / 大部分文件管理器）
         try {
@@ -93,6 +103,35 @@ public class UriPathResolver {
         if (!file.isFile()) return null;
         if (expectedSize > 0 && file.length() != expectedSize) return null;
         return file;
+    }
+
+    /**
+     * 解析自有 FileManager 的 FileProvider URI 为真实文件路径。
+     * FileManager 的 file_paths.xml 定义了 external、root、files 等路径映射。
+     */
+    private static File resolveFileManagerUri(Uri uri) {
+        if (!FILE_MANAGER_AUTHORITY.equals(uri.getAuthority())) return null;
+        List<String> segments = uri.getPathSegments();
+        if (segments == null || segments.isEmpty()) return null;
+
+        String rootName = segments.get(0);
+        // 构建相对路径（去掉首段 rootName）
+        StringBuilder relPath = new StringBuilder();
+        for (int i = 1; i < segments.size(); i++) {
+            if (relPath.length() > 0) relPath.append('/');
+            relPath.append(segments.get(i));
+        }
+        String rel = relPath.toString();
+        if (rel.isEmpty()) return null;
+
+        switch (rootName) {
+            case "external":
+                return new File(Environment.getExternalStorageDirectory(), rel);
+            case "root":
+                return new File("/" + rel);
+            default:
+                return null;
+        }
     }
 
     private static long querySize(Context context, Uri uri) {
