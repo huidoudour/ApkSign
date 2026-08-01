@@ -148,6 +148,22 @@ body {
     transition: border-color .2s, box-shadow .2s, transform .2s;
 }
 
+.feature-card.tip {
+    background: var(--accent-light);
+    border-style: dashed;
+    text-align: center;
+}
+
+.feature-card.tip a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.feature-card.tip a:hover {
+    text-decoration: underline;
+}
+
 .feature-card:hover {
     border-color: var(--accent);
     box-shadow: 0 4px 12px rgba(59,130,246,.1);
