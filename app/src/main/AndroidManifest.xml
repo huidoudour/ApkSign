@@ -88,6 +88,13 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <meta-data
+            android:name="me.huidoudour.core.version"
+            android:value="39" />
+        <meta-data
+            android:name="me.huidoudour.file.manager"
+            android:value="true" />
     </application>
 
 </manifest>

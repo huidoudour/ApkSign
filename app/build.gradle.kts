@@ -8,8 +8,8 @@ plugins {
 }
 
 // ── Git 版本控制 ──
-val appBackVersion = 3
-val appBaseVersion = "26.1"
+val appBackVersion = 10
+val appBaseVersion = "26.3"
 
 fun Project.gitCommitCount(): Int = try {
     providers.exec { commandLine("git", "rev-list", "--count", "HEAD") }
