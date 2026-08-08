@@ -246,15 +246,24 @@ public class ShareSignActivity extends AppCompatActivity {
         values.put(MediaStore.Downloads.IS_PENDING, 1);
         Uri outputUri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
         if (outputUri == null) {
+            // API 29 部分设备（华为 EMUI 10）不支持 RELATIVE_PATH 子目录，降级到 Download 根目录
+            values.remove(MediaStore.Downloads.RELATIVE_PATH);
+            values.put(MediaStore.Downloads.DISPLAY_NAME, "ApkSign_" + outName);
+            outputUri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+        }
+        if (outputUri == null) {
             Toast.makeText(this, R.string.output_create_failed, Toast.LENGTH_LONG).show();
             return;
         }
-        String locationLabel = Environment.DIRECTORY_DOWNLOADS + "/ApkSign/" + outName;
+        final Uri finalUri = outputUri;
+        String locationLabel = finalUri.getLastPathSegment() != null
+                ? Environment.DIRECTORY_DOWNLOADS + "/" + finalUri.getLastPathSegment()
+                : Environment.DIRECTORY_DOWNLOADS + "/ApkSign/" + outName;
 
         setBusy(true);
         ApkSignTask.run(this, apkUri, config,
                 cbV1.isChecked(), cbV2.isChecked(), cbV3.isChecked(),
-                outputUri, null, new ApkSignTask.Callback() {
+                finalUri, null, new ApkSignTask.Callback() {
                     @Override
                     public void onProgress(String message) {
                         tvStatus.setText(message);
@@ -265,8 +274,8 @@ public class ShareSignActivity extends AppCompatActivity {
                         // 清除 IS_PENDING，让文件对其他应用可见
                         ContentValues done = new ContentValues();
                         done.put(MediaStore.Downloads.IS_PENDING, 0);
-                        getContentResolver().update(outputUri, done, null, null);
-                        signedOutputUri = outputUri;
+                        getContentResolver().update(finalUri, done, null, null);
+                        signedOutputUri = finalUri;
                         setBusy(false);
                         tvStatus.setText(getString(R.string.sign_success, elapsedMs) + "\n"
                                 + getString(R.string.sign_output_path, locationLabel));
@@ -277,7 +286,7 @@ public class ShareSignActivity extends AppCompatActivity {
                     public void onError(Throwable error) {
                         // 失败时清理占位的输出条目
                         try {
-                            getContentResolver().delete(outputUri, null, null);
+                            getContentResolver().delete(finalUri, null, null);
                         } catch (Exception ignored) {
                         }
                         setBusy(false);

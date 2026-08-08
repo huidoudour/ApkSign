@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -92,19 +93,72 @@ public class KeystoreHelper {
         }
 
         Exception lastError = null;
-        for (String type : new String[]{TYPE_PKCS12, TYPE_BKS}) {
-            try {
-                KeyStore ks = KeyStore.getInstance(type);
-                try (InputStream in = new FileInputStream(file)) {
-                    ks.load(in, storePassword);
-                }
-                return new Loaded(type, ks, null);
-            } catch (Exception e) {
-                lastError = e;
-            }
+
+        // PKCS12：Android 内置支持，优先使用系统 provider（避免 bcprov-jdk18on 的 intValueExact 兼容问题）
+        try {
+            KeyStore ks = loadPkcs12(file, storePassword);
+            if (ks != null) return new Loaded(TYPE_PKCS12, ks, null);
+        } catch (IOException e) {
+            // PKCS12 抛出的 IO 异常（密码错误 / BC 不兼容）是明确的，直接向上报告
+            throw e;
+        } catch (Exception e) {
+            // 非 IO 异常（如 NoSuchAlgorithmException），可能是格式不对，继续尝试 BKS
+            lastError = e;
         }
+
+        // BKS：需要 Bouncy Castle，显式指定 provider
+        try {
+            KeyStore ks = KeyStore.getInstance(TYPE_BKS, "BC");
+            try (InputStream in = new FileInputStream(file)) {
+                ks.load(in, storePassword);
+            }
+            return new Loaded(TYPE_BKS, ks, null);
+        } catch (Exception | NoSuchMethodError e) {
+            lastError = (e instanceof Exception) ? (Exception) e : new Exception(e);
+        }
+
         throw new IOException("无法加载密钥库（格式不支持或密码错误）: "
                 + (lastError != null ? lastError.getMessage() : ""), lastError);
+    }
+
+    /**
+     * 加载 PKCS12 密钥库。
+     * 使用 jdk15to18 版 BC（编译目标 Java 1.5，无 intValueExact 兼容问题），
+     * 保留 Android 内置 BC 反射回退。
+     */
+    private static KeyStore loadPkcs12(File file, char[] password) throws Exception {
+        // 1. 外部 BC provider（jdk15to18，全面兼容 API 29）
+        try {
+            KeyStore ks = KeyStore.getInstance(TYPE_PKCS12, "BC");
+            try (InputStream in = new FileInputStream(file)) {
+                ks.load(in, password);
+            }
+            return ks;
+        } catch (NoSuchMethodError e) {
+            // jdk15to18 不应触发此路径，但保留回退以防万一
+        }
+
+        // 2. 反射加载 Android 内置 BC provider
+        try {
+            Class<?> c = Class.forName("com.android.org.bouncycastle.jce.provider.BouncyCastleProvider");
+            Provider androidBc = (Provider) c.getDeclaredConstructor().newInstance();
+            KeyStore ks = KeyStore.getInstance(TYPE_PKCS12, androidBc);
+            try (InputStream in = new FileInputStream(file)) {
+                ks.load(in, password);
+            }
+            return ks;
+        } catch (IOException e) {
+            throw e; // 密码错误直接抛出
+        } catch (Exception e) {
+            // Android 内置 BC 也不可用
+        }
+
+        // 3. 系统默认 provider（最后尝试）
+        KeyStore ks = KeyStore.getInstance(TYPE_PKCS12);
+        try (InputStream in = new FileInputStream(file)) {
+            ks.load(in, password);
+        }
+        return ks;
     }
 
     private static byte[] readAll(File file) throws IOException {

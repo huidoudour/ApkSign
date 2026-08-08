@@ -8,7 +8,7 @@ material = "1.14.0"
 activityKtx = "1.13.0"
 constraintlayout = "2.2.2"
 apksig = "9.3.1"
-bouncycastle = "1.85"
+bouncycastle = "1.78"
 recyclerview = "1.4.0"
 composeUi = "1.11.4"
 
@@ -23,8 +23,8 @@ compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", versi
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 apksig = { group = "com.android.tools.build", name = "apksig", version.ref = "apksig" }
-bcprov = { group = "org.bouncycastle", name = "bcprov-jdk18on", version.ref = "bouncycastle" }
-bcpkix = { group = "org.bouncycastle", name = "bcpkix-jdk18on", version.ref = "bouncycastle" }
+bcprov = { group = "org.bouncycastle", name = "bcprov-jdk15to18", version.ref = "bouncycastle" }
+bcpkix = { group = "org.bouncycastle", name = "bcpkix-jdk15to18", version.ref = "bouncycastle" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

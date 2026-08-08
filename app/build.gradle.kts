@@ -9,7 +9,7 @@ plugins {
 
 // ── Git 版本控制 ──
 val appBackVersion = 10
-val appBaseVersion = "26.3"
+val appBaseVersion = "26.4"
 
 fun Project.gitCommitCount(): Int = try {
     providers.exec { commandLine("git", "rev-list", "--count", "HEAD") }
@@ -99,6 +99,7 @@ android {
             }
         }
         release {
+            isDebuggable = false
             isMinifyEnabled = true
             isShrinkResources = true
             signingConfig = if (useSignKey) {

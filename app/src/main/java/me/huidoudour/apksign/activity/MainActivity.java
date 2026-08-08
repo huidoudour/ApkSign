@@ -280,10 +280,19 @@ public class MainActivity extends AppCompatActivity {
         values.put(MediaStore.Downloads.IS_PENDING, 1);
         Uri outputUri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
         if (outputUri == null) {
+            // API 29 部分设备（华为 EMUI 10）不支持 RELATIVE_PATH 子目录，降级到 Download 根目录
+            values.remove(MediaStore.Downloads.RELATIVE_PATH);
+            values.put(MediaStore.Downloads.DISPLAY_NAME, "ApkSign_" + outName);
+            outputUri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+        }
+        if (outputUri == null) {
             Toast.makeText(this, R.string.output_create_failed, Toast.LENGTH_LONG).show();
             return;
         }
-        doSign(outputUri, null, Environment.DIRECTORY_DOWNLOADS + "/ApkSign/" + outName);
+        String locationLabel = outputUri.getLastPathSegment() != null
+                ? Environment.DIRECTORY_DOWNLOADS + "/" + outputUri.getLastPathSegment()
+                : Environment.DIRECTORY_DOWNLOADS + "/ApkSign/" + outName;
+        doSign(outputUri, null, locationLabel);
     }
 
     private void doSign(Uri outputUri, File outputFile, String locationLabel) {
