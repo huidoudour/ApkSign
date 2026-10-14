@@ -56,6 +56,7 @@
     <string name="action_delete">删除</string>
     <string name="delete_confirm_title">删除密钥配置</string>
     <string name="delete_confirm_msg">确定删除配置"%1$s"吗？私有目录内的密钥库文件也会一并删除，此操作不可恢复。</string>
+    <string name="builtin_testkey_name">TestKey（公开测试密钥）</string>
     <string name="export_success">导出成功</string>
     <string name="export_failed">导出失败: %1$s</string>
 

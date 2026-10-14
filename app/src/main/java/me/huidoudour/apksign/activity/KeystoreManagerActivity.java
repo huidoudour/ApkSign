@@ -45,6 +45,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import me.huidoudour.apksign.R;
+import me.huidoudour.apksign.keystore.BuiltinTestKey;
 import me.huidoudour.apksign.keystore.KeyGenHelper;
 import me.huidoudour.apksign.keystore.KeystoreConfig;
 import me.huidoudour.apksign.keystore.KeystoreHelper;
@@ -372,6 +373,9 @@ public class KeystoreManagerActivity extends AppCompatActivity {
                 pendingExportConfig = config;
                 exportLauncher.launch(config.fileName);
             });
+            // 内置公开 testkey 会自动恢复，不提供删除入口
+            holder.btnDelete.setVisibility(
+                    BuiltinTestKey.CONFIG_ID.equals(config.id) ? View.GONE : View.VISIBLE);
             holder.btnDelete.setOnClickListener(v -> confirmDelete(config));
         }
 

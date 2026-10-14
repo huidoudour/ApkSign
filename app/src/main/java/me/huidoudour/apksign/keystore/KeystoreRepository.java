@@ -15,22 +15,27 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.huidoudour.apksign.R;
+
 /**
  * 密钥配置持久化仓库：
  * - 配置列表保存为 filesDir/keystore_configs.json
  * - keystore 文件本体保存在 filesDir/keystores/ 下
+ * - 内置公开 testkey 在列表缺失时自动恢复
  */
 public class KeystoreRepository {
 
     private static final String CONFIG_FILE = "keystore_configs.json";
     private static final String KEYSTORE_DIR = "keystores";
 
+    private final Context appContext;
     private final File configFile;
     private final File keystoreDir;
 
     public KeystoreRepository(Context context) {
-        configFile = new File(context.getFilesDir(), CONFIG_FILE);
-        keystoreDir = new File(context.getFilesDir(), KEYSTORE_DIR);
+        appContext = context.getApplicationContext();
+        configFile = new File(appContext.getFilesDir(), CONFIG_FILE);
+        keystoreDir = new File(appContext.getFilesDir(), KEYSTORE_DIR);
         if (!keystoreDir.exists()) {
             //noinspection ResultOfMethodCallIgnored
             keystoreDir.mkdirs();
@@ -47,17 +52,48 @@ public class KeystoreRepository {
 
     public synchronized List<KeystoreConfig> loadAll() {
         List<KeystoreConfig> list = new ArrayList<>();
-        if (!configFile.exists()) return list;
-        try (FileInputStream in = new FileInputStream(configFile)) {
-            byte[] buf = new byte[(int) configFile.length()];
-            int read = in.read(buf);
-            JSONArray arr = new JSONArray(new String(buf, 0, Math.max(read, 0), StandardCharsets.UTF_8));
-            for (int i = 0; i < arr.length(); i++) {
-                list.add(KeystoreConfig.fromJson(arr.getJSONObject(i)));
+        if (configFile.exists()) {
+            try (FileInputStream in = new FileInputStream(configFile)) {
+                byte[] buf = new byte[(int) configFile.length()];
+                int read = in.read(buf);
+                JSONArray arr = new JSONArray(new String(buf, 0, Math.max(read, 0), StandardCharsets.UTF_8));
+                for (int i = 0; i < arr.length(); i++) {
+                    list.add(KeystoreConfig.fromJson(arr.getJSONObject(i)));
+                }
+            } catch (Exception ignored) {
             }
-        } catch (Exception ignored) {
+        }
+        if (ensureBuiltinTestKey(list)) {
+            saveAll(list);
         }
         return list;
+    }
+
+    /**
+     * 保障内置公开 testkey 始终可用：配置或密钥库文件缺失时自动恢复。
+     * 返回列表是否发生变化（需要写回）。
+     */
+    private boolean ensureBuiltinTestKey(List<KeystoreConfig> list) {
+        for (KeystoreConfig c : list) {
+            if (BuiltinTestKey.CONFIG_ID.equals(c.id) && getKeystoreFile(c).exists()) {
+                return false;
+            }
+        }
+        // 清理文件丢失的残留项后重建
+        list.removeIf(c -> BuiltinTestKey.CONFIG_ID.equals(c.id));
+        try {
+            BuiltinTestKey.ensureFile(appContext, new File(keystoreDir, BuiltinTestKey.FILE_NAME));
+        } catch (Exception e) {
+            // assets 缺失等异常：跳过内置密钥，不影响其他配置
+            return false;
+        }
+        KeystoreConfig builtin = KeystoreConfig.create(
+                appContext.getString(R.string.builtin_testkey_name),
+                BuiltinTestKey.FILE_NAME, KeystoreHelper.TYPE_PKCS12,
+                BuiltinTestKey.PASSWORD, BuiltinTestKey.ALIAS, BuiltinTestKey.PASSWORD);
+        builtin.id = BuiltinTestKey.CONFIG_ID;
+        list.add(0, builtin);
+        return true;
     }
 
     public synchronized void add(KeystoreConfig config) {
