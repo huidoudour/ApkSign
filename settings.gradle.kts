@@ -26,3 +26,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "ApkSign"
 include(":app")
+include(":baseline")

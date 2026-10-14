@@ -5,6 +5,7 @@ import java.util.Date
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.baselineprofile)
 }
 
 // ── Git 版本控制 ──
@@ -27,8 +28,10 @@ val appVersionCode = gitCommitCount()
 val appVersionName = "${appBaseVersion}.${gitCommitCount()}.${gitHash()}"
 
 tasks.matching { it.name.startsWith("assemble") || it.name.startsWith("bundle") }.configureEach {
+    val printedVersionName = appVersionName
+    val printedVersionCode = appVersionCode
     doLast {
-        println(">>>[$name]:BuildSuccessful | versionName=$appVersionName | versionCode=$appVersionCode<<<")
+        println(">>> ApkSign-[$name]: $printedVersionName($printedVersionCode) <<<")
     }
 }
 
@@ -134,6 +137,7 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.material)
     implementation(libs.compose.ui.tooling)
+    implementation(libs.profileinstaller)
     implementation(libs.recyclerview)
     implementation(libs.apksig)
     implementation(libs.bcprov)
@@ -145,4 +149,5 @@ dependencies {
     // MTDataFilesProvider
     //noinspection UseTomlInstead
     implementation("com.github.L-JINBIN:MTDataFilesProvider:v1.0.0")
+    "baselineProfile"(project(":baseline"))
 }
