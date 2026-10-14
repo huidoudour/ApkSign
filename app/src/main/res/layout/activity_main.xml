@@ -171,12 +171,13 @@
                 android:text="@string/btn_request_install"
                 android:visibility="gone" />
 
-            <com.google.android.material.progressindicator.LinearProgressIndicator
+            <com.google.android.material.loadingindicator.LoadingIndicator
                 android:id="@+id/progress"
-                android:layout_width="match_parent"
+                style="@style/Widget.Material3.LoadingIndicator.Contained"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:layout_marginTop="12dp"
-                android:indeterminate="true"
                 android:visibility="gone" />
 
             <TextView

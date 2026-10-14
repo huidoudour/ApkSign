@@ -5,12 +5,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -24,8 +26,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.color.MaterialColors;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
+import com.google.android.material.loadingindicator.LoadingIndicator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +58,7 @@ public class ShareSignActivity extends AppCompatActivity {
     private AlertDialog dialog;
     private Spinner spinnerKeystore;
     private CheckBox cbV1, cbV2, cbV3;
-    private LinearProgressIndicator progress;
+    private LoadingIndicator progress;
     private TextView tvStatus;
 
     // 签名成功后的产物，供"安装"按钮使用
@@ -188,11 +191,16 @@ public class ShareSignActivity extends AppCompatActivity {
         schemeParams.topMargin = dp8;
         root.addView(schemes, schemeParams);
 
-        // 进度与状态（签名开始后可见）
-        progress = new LinearProgressIndicator(this);
-        progress.setIndeterminate(true);
+        // 进度与状态（签名开始后可见）：Material3 Expressive 容器加载动画
+        progress = new LoadingIndicator(this);
+        progress.setIndicatorColor(MaterialColors.getColor(this,
+                com.google.android.material.R.attr.colorOnPrimaryContainer, Color.BLACK));
+        progress.setContainerColor(MaterialColors.getColor(this,
+                com.google.android.material.R.attr.colorPrimaryContainer, Color.TRANSPARENT));
         progress.setVisibility(View.GONE);
-        LinearLayout.LayoutParams progressParams = wrapParams();
+        LinearLayout.LayoutParams progressParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        progressParams.gravity = Gravity.CENTER_HORIZONTAL;
         progressParams.topMargin = dp16;
         root.addView(progress, progressParams);
 

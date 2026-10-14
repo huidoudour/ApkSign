@@ -33,7 +33,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
+import com.google.android.material.loadingindicator.LoadingIndicator;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     private CheckBox cbV1, cbV2, cbV3;
     private Button btnSign;
     private Button btnInstall;
-    private LinearProgressIndicator progress;
+    private LoadingIndicator progress;
 
     private Uri apkUri;
     private String apkDisplayName;

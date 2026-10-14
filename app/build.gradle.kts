@@ -58,10 +58,6 @@ android {
         rootProject.hasProperty("storePassword") &&
         rootProject.hasProperty("keyAlias") &&
         rootProject.hasProperty("keyPassword")
-    val devSignKey = rootProject.hasProperty("dbgFilePath") &&
-        rootProject.hasProperty("dbgPassword") &&
-        rootProject.hasProperty("dbgKeyAlias") &&
-        rootProject.hasProperty("dbgKeyPaswd")
 
     if (useSignKey) {
         signingConfigs {
@@ -77,25 +73,11 @@ android {
             }
         }
     }
-    if (devSignKey) {
-        signingConfigs {
-            register("debug_key") {
-                storeFile = file(rootProject.property("dbgFilePath") as String)
-                storePassword = rootProject.property("dbgPassword") as String
-                keyAlias = rootProject.property("dbgKeyAlias") as String
-                keyPassword = rootProject.property("dbgKeyPaswd") as String
-                enableV1Signing = true
-                enableV2Signing = true
-                enableV3Signing = true
-                enableV4Signing = false
-            }
-        }
-    }
 
     buildTypes {
         debug {
             isDebuggable = true
-            signingConfig = if (devSignKey) {
+            signingConfig = if (useSignKey) {
                 signingConfigs.getByName("sign_key")
             } else {
                 signingConfigs.getByName("debug")
