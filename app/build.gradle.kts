@@ -10,7 +10,7 @@ plugins {
 
 // ── Git 版本控制 ──
 val appBackVersion = 10
-val appBaseVersion = "26.4"
+val appBaseVersion = "26.7"
 
 fun Project.gitCommitCount(): Int = try {
     providers.exec { commandLine("git", "rev-list", "--count", "HEAD") }
@@ -38,8 +38,8 @@ tasks.matching { it.name.startsWith("assemble") || it.name.startsWith("bundle") 
 android {
     namespace = "me.huidoudour.apksign"
     compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
+        version = release(37) {
+            minorApiLevel = 2
         }
     }
 
