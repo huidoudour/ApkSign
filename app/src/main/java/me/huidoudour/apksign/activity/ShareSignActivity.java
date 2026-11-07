@@ -32,9 +32,9 @@ import com.google.android.material.loadingindicator.LoadingIndicator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import me.huidoudour.apksign.R;
+import me.huidoudour.apksign.i18n.LocalizedException;
 import me.huidoudour.apksign.keystore.KeystoreConfig;
 import me.huidoudour.apksign.keystore.KeystoreRepository;
 import me.huidoudour.apksign.signer.ApkSignTask;
@@ -160,7 +160,7 @@ public class ShareSignActivity extends AppCompatActivity {
         spinnerKeystore = new Spinner(this);
         List<String> names = new ArrayList<>();
         for (KeystoreConfig c : configs) {
-            names.add(c.name + " [" + c.keyAlias + "]");
+            names.add(getString(R.string.keystore_spinner_item, c.name, c.keyAlias));
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_item, names);
@@ -227,12 +227,10 @@ public class ShareSignActivity extends AppCompatActivity {
             }
         } catch (Exception ignored) {
         }
-        apkDisplayName = name != null ? name : "unknown.apk";
-        String info = apkDisplayName;
-        if (size >= 0) {
-            info += String.format(Locale.getDefault(), " (%.2f MB)", size / 1048576.0);
-        }
-        return info;
+        apkDisplayName = name != null ? name : getString(R.string.apk_name_unknown);
+        return size >= 0
+                ? getString(R.string.apk_info_with_size, apkDisplayName, size / 1048576.0)
+                : apkDisplayName;
     }
 
     /** 分享场景拿不到原目录写权限，产物统一写入 Download/ApkSign/ */
@@ -285,8 +283,9 @@ public class ShareSignActivity extends AppCompatActivity {
                         getContentResolver().update(finalUri, done, null, null);
                         signedOutputUri = finalUri;
                         setBusy(false);
-                        tvStatus.setText(getString(R.string.sign_success, elapsedMs) + "\n"
-                                + getString(R.string.sign_output_path, locationLabel));
+                        tvStatus.setText(getString(R.string.sign_result_two_lines,
+                                getString(R.string.sign_success, elapsedMs),
+                                getString(R.string.sign_output_path, locationLabel)));
                         onSignFinished(true);
                     }
 
@@ -299,7 +298,7 @@ public class ShareSignActivity extends AppCompatActivity {
                         }
                         setBusy(false);
                         tvStatus.setText(getString(R.string.sign_failed,
-                                error.getMessage() != null ? error.getMessage() : error.toString()));
+                                LocalizedException.describe(ShareSignActivity.this, error)));
                         onSignFinished(false);
                     }
                 });

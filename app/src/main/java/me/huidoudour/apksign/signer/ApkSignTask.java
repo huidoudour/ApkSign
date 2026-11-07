@@ -11,10 +11,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import me.huidoudour.apksign.R;
+import me.huidoudour.apksign.i18n.LocalizedException;
 import me.huidoudour.apksign.keystore.KeystoreConfig;
 import me.huidoudour.apksign.keystore.KeystoreHelper;
 import me.huidoudour.apksign.keystore.KeystoreRepository;
@@ -50,25 +54,28 @@ public class ApkSignTask {
             File outFile = new File(app.getCacheDir(), "sign_out_" + start + ".apk");
             try {
                 // 1. 拷贝输入 APK 到临时文件
-                post(callback, "正在读取 APK...");
+                post(callback, app.getString(R.string.progress_read_apk));
                 try (InputStream in = app.getContentResolver().openInputStream(apkUri);
                      OutputStream out = new java.io.FileOutputStream(inFile)) {
-                    if (in == null) throw new java.io.IOException("无法读取所选 APK");
+                    if (in == null) throw new LocalizedException(R.string.error_read_apk);
                     copy(in, out);
                 }
 
                 // 2. 加载密钥
-                post(callback, "正在加载密钥库...");
+                post(callback, app.getString(R.string.progress_load_keystore));
                 KeystoreRepository repo = new KeystoreRepository(app);
                 File ksFile = repo.getKeystoreFile(config);
-                if (!ksFile.exists()) throw new java.io.IOException("密钥库文件丢失，请重新导入");
+                if (!ksFile.exists()) {
+                    throw new LocalizedException(R.string.error_keystore_file_missing);
+                }
                 KeystoreHelper.Loaded loaded =
                         KeystoreHelper.load(ksFile, config.storePassword.toCharArray());
                 KeystoreHelper.SignerIdentity identity =
                         loaded.getSigner(config.keyAlias, config.keyPassword.toCharArray());
 
                 // 3. 签名（apksig 会自动处理 zip 对齐与摘要计算）
-                post(callback, "正在签名 (v1=" + v1 + ", v2=" + v2 + ", v3=" + v3 + ")...");
+                post(callback, app.getString(R.string.progress_signing,
+                        schemesLabel(app, v1, v2, v3)));
                 ApkSigner.SignerConfig signerConfig = new ApkSigner.SignerConfig.Builder(
                         config.keyAlias, identity.privateKey, identity.certificates).build();
                 ApkSigner signer = new ApkSigner.Builder(Collections.singletonList(signerConfig))
@@ -82,12 +89,12 @@ public class ApkSignTask {
                 signer.sign();
 
                 // 4. 写出结果
-                post(callback, "正在保存输出文件...");
+                post(callback, app.getString(R.string.progress_save_output));
                 try (InputStream in = new FileInputStream(outFile);
                      OutputStream out = outputFile != null
                              ? new java.io.FileOutputStream(outputFile)
                              : app.getContentResolver().openOutputStream(outputUri, "wt")) {
-                    if (out == null) throw new java.io.IOException("无法写入输出文件");
+                    if (out == null) throw new LocalizedException(R.string.error_write_output);
                     copy(in, out);
                 }
 
@@ -106,6 +113,15 @@ public class ApkSignTask {
 
     private static void post(Callback callback, String message) {
         MAIN.post(() -> callback.onProgress(message));
+    }
+
+    /** 组装进度文案里的签名方案列表（如 "v1, v2, v3"） */
+    private static String schemesLabel(Context context, boolean v1, boolean v2, boolean v3) {
+        List<String> labels = new ArrayList<>(3);
+        if (v1) labels.add(context.getString(R.string.scheme_v1_short));
+        if (v2) labels.add(context.getString(R.string.scheme_v2));
+        if (v3) labels.add(context.getString(R.string.scheme_v3));
+        return String.join(", ", labels);
     }
 
     private static void copy(InputStream in, OutputStream out) throws java.io.IOException {

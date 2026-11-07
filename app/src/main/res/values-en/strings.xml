@@ -1,0 +1,122 @@
+<resources>
+    <string name="app_name">ApkSign</string>
+    <string name="dis_name">APK Sign</string>
+
+    <!-- Main screen -->
+    <string name="title_apk">APK File</string>
+    <string name="btn_select_apk">Select APK</string>
+    <string name="apk_not_selected">No file selected</string>
+    <string name="title_keystore">Signing Key</string>
+    <string name="btn_manage_keystore">Manage Keys</string>
+    <string name="no_keystore_hint">No signing key yet. Go to \"Manage Keys\" to import or generate one.</string>
+    <string name="title_scheme">Signature Schemes</string>
+    <string name="scheme_v1">v1 (JAR signing)</string>
+    <string name="scheme_v2">v2</string>
+    <string name="scheme_v3">v3</string>
+    <string name="btn_sign">Sign</string>
+    <string name="title_log">Log</string>
+    <string name="toast_select_apk_first">Please select an APK file first</string>
+    <string name="toast_select_keystore_first">Please select a signing key first</string>
+    <string name="toast_select_scheme_first">Please enable at least one signature scheme</string>
+    <string name="sign_success">Signed successfully in %1$d ms</string>
+    <string name="sign_failed">Signing failed: %1$s</string>
+    <string name="sign_output_path">Saved to %1$s</string>
+    <string name="output_create_failed">Failed to create the output file</string>
+
+    <!-- Save back to the original folder -->
+    <string name="perm_dialog_title">Permission required to save back</string>
+    <string name="perm_dialog_msg">Original folder located:\n%1$s\n\nSaving the signed APK back to this folder requires \"All files access\". You can also save it to the Download folder this time.</string>
+    <string name="perm_go_grant">Grant</string>
+    <string name="perm_use_download">Save to Download</string>
+    <string name="perm_granted_retry">After granting, tap \"Sign\" again</string>
+    <string name="first_run_perm_title">Grant storage permission</string>
+    <string name="first_run_perm_msg">To save the signed APK directly back to the folder of the original APK, \"All files access\" is required.\n\nGrant it now? You can also grant it later while signing; without it the result is saved to the Download folder.</string>
+
+    <!-- Install request -->
+    <string name="btn_request_install">Install</string>
+    <string name="installer_dialog_title">Select installer</string>
+    <string name="installer_none_found">No available installer found</string>
+    <string name="installer_launch_failed">Unable to launch the selected installer</string>
+    <string name="install_output_missing">Signed APK is missing, please sign again</string>
+
+    <!-- Quick sign dialog for shared APK -->
+    <string name="share_sign_title">Quick Sign</string>
+    <string name="share_sign_read_failed">Failed to read the shared APK file</string>
+    <string name="scheme_v1_short">v1</string>
+    <string name="btn_go_manage">Manage Keys</string>
+    <string name="btn_install">Install</string>
+    <string name="btn_done">Done</string>
+
+    <!-- Keystore manager screen -->
+    <string name="title_keystore_manager">Keystore Manager</string>
+    <string name="empty_keystore_list">No signing key yet\nTap + at the bottom right to import or generate one</string>
+    <string name="action_import">Import keystore</string>
+    <string name="action_generate">Generate new key</string>
+    <string name="action_export">Export</string>
+    <string name="action_delete">Delete</string>
+    <string name="delete_confirm_title">Delete signing key</string>
+    <string name="delete_confirm_msg">Delete \"%1$s\"? The keystore file in the private directory will be deleted as well. This cannot be undone.</string>
+    <string name="builtin_testkey_name">TestKey (public test key)</string>
+    <string name="export_success">Exported</string>
+    <string name="export_failed">Export failed: %1$s</string>
+
+    <!-- Import dialog -->
+    <string name="dialog_import_title">Import keystore</string>
+    <string name="btn_pick_keystore">Select keystore file (JKS/BKS/P12)</string>
+    <string name="hint_store_password">Keystore password</string>
+    <string name="btn_load_aliases">Load aliases</string>
+    <string name="hint_key_alias">Key alias</string>
+    <string name="hint_key_password">Alias password (usually the same as keystore password for PKCS12)</string>
+    <string name="hint_config_name">Config name</string>
+    <string name="import_load_success">Loaded (%1$s), please select an alias</string>
+    <string name="import_load_failed">Load failed: %1$s</string>
+    <string name="import_no_key_alias">No private key entry in this keystore</string>
+    <string name="import_success">Imported</string>
+    <string name="import_verify_failed">Verification failed: %1$s</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_cancel">Cancel</string>
+
+    <!-- Generate dialog -->
+    <string name="dialog_generate_title">Generate new key</string>
+    <string name="hint_gen_alias">Key alias</string>
+    <string name="hint_gen_password">Password (used for both keystore and alias)</string>
+    <string name="hint_gen_cn">Common Name CN (required)</string>
+    <string name="hint_gen_o">Organization O (optional)</string>
+    <string name="hint_gen_ou">Organizational Unit OU (optional)</string>
+    <string name="hint_gen_validity">Validity (years)</string>
+    <string name="label_gen_algorithm">Algorithm</string>
+    <string name="generate_success">Generated</string>
+    <string name="generate_failed">Generation failed: %1$s</string>
+    <string name="field_required">This field is required</string>
+    <string name="generating">Generating key…</string>
+
+    <!-- Logs and common errors -->
+    <string name="log_start_sign">Start signing: %1$s → key [%2$s]</string>
+    <string name="error_read_apk">Unable to read the selected APK</string>
+    <string name="error_write_output">Unable to write the output file</string>
+    <string name="error_keystore_file_missing">Keystore file is missing, please import it again</string>
+    <string name="error_open_input_failed">Unable to read the selected file</string>
+    <string name="error_open_output_failed">Unable to write the selected file</string>
+
+    <!-- Signing progress -->
+    <string name="progress_read_apk">Reading APK…</string>
+    <string name="progress_load_keystore">Loading keystore…</string>
+    <string name="progress_signing">Signing (%1$s)…</string>
+    <string name="progress_save_output">Saving output file…</string>
+
+    <!-- Keystore parsing errors -->
+    <string name="keystore_jceks_unsupported">JCEKS is not supported yet, convert it to PKCS12 with keytool first</string>
+    <string name="keystore_invalid_jks">Not a valid JKS keystore file</string>
+    <string name="keystore_unsupported_jks_version">Unsupported JKS version: %1$d</string>
+    <string name="keystore_unknown_entry_type">Unrecognized JKS entry type: %1$d</string>
+    <string name="keystore_parse_cert_failed">Failed to parse certificate: %1$s</string>
+    <string name="keystore_wrong_password_or_corrupt">Keystore password is wrong or the file is corrupted</string>
+    <string name="keystore_alias_not_private_key">Alias does not exist or is not a private key entry: %1$s</string>
+    <string name="keystore_unsupported_key_protection">Unsupported private key protection algorithm: %1$s</string>
+    <string name="keystore_key_data_corrupt">Private key data is corrupted</string>
+    <string name="keystore_alias_password_wrong">Alias password is wrong</string>
+    <string name="keystore_missing_cert_chain">Entry is missing the certificate chain: %1$s</string>
+    <string name="keystore_file_too_small">File is too small to be a valid keystore</string>
+    <string name="keystore_load_failed">Unable to load the keystore (unsupported format or wrong password): %1$s</string>
+    <string name="keystore_unknown_error">Keystore processing failed: %1$s</string>
+</resources>

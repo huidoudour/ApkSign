@@ -7,11 +7,15 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Provider;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+
+import me.huidoudour.apksign.R;
+import me.huidoudour.apksign.i18n.LocalizedException;
 
 /**
  * 统一的密钥库加载入口，屏蔽 PKCS12 / BKS / JKS 三种格式差异。
@@ -62,15 +66,23 @@ public class KeystoreHelper {
                 PrivateKey key = jks.getPrivateKey(alias, keyPassword);
                 List<X509Certificate> chain = jks.getCertificateChain(alias);
                 if (chain == null || chain.isEmpty()) {
-                    throw new IOException("条目缺少证书链: " + alias);
+                    throw new LocalizedException(R.string.keystore_missing_cert_chain, alias);
                 }
                 return new SignerIdentity(key, chain);
             }
-            PrivateKey key = (PrivateKey) keyStore.getKey(alias, keyPassword);
-            if (key == null) throw new IOException("别名不存在或不是私钥条目: " + alias);
+            PrivateKey key;
+            try {
+                key = (PrivateKey) keyStore.getKey(alias, keyPassword);
+            } catch (UnrecoverableKeyException e) {
+                // Provider 抛出的是英文异常，统一转换成可翻译的别名密码错误
+                throw new LocalizedException(e, R.string.keystore_alias_password_wrong);
+            }
+            if (key == null) {
+                throw new LocalizedException(R.string.keystore_alias_not_private_key, alias);
+            }
             Certificate[] certs = keyStore.getCertificateChain(alias);
             if (certs == null || certs.length == 0) {
-                throw new IOException("条目缺少证书链: " + alias);
+                throw new LocalizedException(R.string.keystore_missing_cert_chain, alias);
             }
             List<X509Certificate> chain = new ArrayList<>(certs.length);
             for (Certificate c : certs) chain.add((X509Certificate) c);
@@ -84,7 +96,7 @@ public class KeystoreHelper {
      */
     public static Loaded load(File file, char[] storePassword) throws Exception {
         byte[] data = readAll(file);
-        if (data.length < 4) throw new IOException("文件太小，不是有效的密钥库");
+        if (data.length < 4) throw new LocalizedException(R.string.keystore_file_too_small);
 
         int magic = ((data[0] & 0xFF) << 24) | ((data[1] & 0xFF) << 16)
                 | ((data[2] & 0xFF) << 8) | (data[3] & 0xFF);
@@ -99,8 +111,8 @@ public class KeystoreHelper {
             KeyStore ks = loadPkcs12(file, storePassword);
             if (ks != null) return new Loaded(TYPE_PKCS12, ks, null);
         } catch (IOException e) {
-            // PKCS12 抛出的 IO 异常（密码错误 / BC 不兼容）是明确的，直接向上报告
-            throw e;
+            // PKCS12 抛出的 IO 异常（密码错误 / BC 不兼容）统一按密码错误提示
+            throw new LocalizedException(e, R.string.keystore_wrong_password_or_corrupt);
         } catch (Exception e) {
             // 非 IO 异常（如 NoSuchAlgorithmException），可能是格式不对，继续尝试 BKS
             lastError = e;
@@ -117,8 +129,8 @@ public class KeystoreHelper {
             lastError = (e instanceof Exception) ? (Exception) e : new Exception(e);
         }
 
-        throw new IOException("无法加载密钥库（格式不支持或密码错误）: "
-                + (lastError != null ? lastError.getMessage() : ""), lastError);
+        throw new LocalizedException(lastError, R.string.keystore_load_failed,
+                lastError != null ? lastError.getMessage() : "");
     }
 
     /**

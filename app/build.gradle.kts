@@ -98,6 +98,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    @Suppress("UnstableApiUsage")
+    androidResources {
+        // 仅保留 en 与 zh 两种语言资源（不使用 zh-rCN）
+        localeFilters += listOf("en", "zh")
+    }
     packaging {
         resources {
             excludes += setOf(

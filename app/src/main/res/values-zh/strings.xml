@@ -1,0 +1,122 @@
+<resources>
+    <string name="app_name">ApkSign</string>
+    <string name="dis_name">apk签名</string>
+
+    <!-- 主页 -->
+    <string name="title_apk">APK 文件</string>
+    <string name="btn_select_apk">选择 APK</string>
+    <string name="apk_not_selected">未选择文件</string>
+    <string name="title_keystore">签名密钥</string>
+    <string name="btn_manage_keystore">管理密钥</string>
+    <string name="no_keystore_hint">暂无密钥配置，请先到"管理密钥"中导入或生成</string>
+    <string name="title_scheme">签名方案</string>
+    <string name="scheme_v1">v1 (JAR 签名)</string>
+    <string name="scheme_v2">v2</string>
+    <string name="scheme_v3">v3</string>
+    <string name="btn_sign">开始签名</string>
+    <string name="title_log">日志</string>
+    <string name="toast_select_apk_first">请先选择 APK 文件</string>
+    <string name="toast_select_keystore_first">请先选择签名密钥</string>
+    <string name="toast_select_scheme_first">请至少勾选一种签名方案</string>
+    <string name="sign_success">签名成功，耗时 %1$d ms</string>
+    <string name="sign_failed">签名失败: %1$s</string>
+    <string name="sign_output_path">已保存到 %1$s</string>
+    <string name="output_create_failed">创建输出文件失败</string>
+
+    <!-- 存回原目录 -->
+    <string name="perm_dialog_title">存回原目录需要授权</string>
+    <string name="perm_dialog_msg">已定位到原文件目录：\n%1$s\n\n把签名结果存回该目录需要"所有文件访问权限"，也可以本次先存到下载目录。</string>
+    <string name="perm_go_grant">去授权</string>
+    <string name="perm_use_download">存到下载目录</string>
+    <string name="perm_granted_retry">授权后请再次点击"开始签名"</string>
+    <string name="first_run_perm_title">授予存储权限</string>
+    <string name="first_run_perm_msg">为了把签名结果直接存回原 APK 所在目录，需要"所有文件访问权限"。\n\n现在去授权吗？也可以稍后在签名时再授权，未授权时结果会存到下载目录。</string>
+
+    <!-- 请求安装 -->
+    <string name="btn_request_install">请求安装</string>
+    <string name="installer_dialog_title">选择安装器</string>
+    <string name="installer_none_found">未找到可用的安装器</string>
+    <string name="installer_launch_failed">无法启动所选安装器</string>
+    <string name="install_output_missing">签名产物不存在，请重新签名</string>
+
+    <!-- 分享快速签名对话框 -->
+    <string name="share_sign_title">快速签名</string>
+    <string name="share_sign_read_failed">未能获取分享的 APK 文件</string>
+    <string name="scheme_v1_short">v1</string>
+    <string name="btn_go_manage">去管理密钥</string>
+    <string name="btn_install">安装</string>
+    <string name="btn_done">完成</string>
+
+    <!-- 密钥管理页 -->
+    <string name="title_keystore_manager">密钥管理</string>
+    <string name="empty_keystore_list">还没有密钥配置\n点右下角 + 导入或生成</string>
+    <string name="action_import">导入密钥库</string>
+    <string name="action_generate">生成新密钥</string>
+    <string name="action_export">导出</string>
+    <string name="action_delete">删除</string>
+    <string name="delete_confirm_title">删除密钥配置</string>
+    <string name="delete_confirm_msg">确定删除配置"%1$s"吗？私有目录内的密钥库文件也会一并删除，此操作不可恢复。</string>
+    <string name="builtin_testkey_name">TestKey（公开测试密钥）</string>
+    <string name="export_success">导出成功</string>
+    <string name="export_failed">导出失败: %1$s</string>
+
+    <!-- 导入对话框 -->
+    <string name="dialog_import_title">导入密钥库</string>
+    <string name="btn_pick_keystore">选择密钥库文件 (JKS/BKS/P12)</string>
+    <string name="hint_store_password">密钥库密码</string>
+    <string name="btn_load_aliases">读取别名</string>
+    <string name="hint_key_alias">密钥别名</string>
+    <string name="hint_key_password">别名密码（PKCS12 通常与库密码相同）</string>
+    <string name="hint_config_name">配置名称</string>
+    <string name="import_load_success">加载成功 (%1$s)，请选择别名</string>
+    <string name="import_load_failed">加载失败: %1$s</string>
+    <string name="import_no_key_alias">该密钥库中没有私钥条目</string>
+    <string name="import_success">导入成功</string>
+    <string name="import_verify_failed">校验失败: %1$s</string>
+    <string name="btn_ok">确定</string>
+    <string name="btn_cancel">取消</string>
+
+    <!-- 生成对话框 -->
+    <string name="dialog_generate_title">生成新密钥</string>
+    <string name="hint_gen_alias">密钥别名</string>
+    <string name="hint_gen_password">密码（库密码与别名密码相同）</string>
+    <string name="hint_gen_cn">名称 CN（必填）</string>
+    <string name="hint_gen_o">组织 O（选填）</string>
+    <string name="hint_gen_ou">组织单元 OU（选填）</string>
+    <string name="hint_gen_validity">有效期（年）</string>
+    <string name="label_gen_algorithm">算法</string>
+    <string name="generate_success">生成成功</string>
+    <string name="generate_failed">生成失败: %1$s</string>
+    <string name="field_required">此项必填</string>
+    <string name="generating">正在生成密钥…</string>
+
+    <!-- 日志与通用错误 -->
+    <string name="log_start_sign">开始签名: %1$s → 密钥[%2$s]</string>
+    <string name="error_read_apk">无法读取所选 APK</string>
+    <string name="error_write_output">无法写入输出文件</string>
+    <string name="error_keystore_file_missing">密钥库文件丢失，请重新导入</string>
+    <string name="error_open_input_failed">无法读取所选文件</string>
+    <string name="error_open_output_failed">无法写入所选文件</string>
+
+    <!-- 签名进度 -->
+    <string name="progress_read_apk">正在读取 APK…</string>
+    <string name="progress_load_keystore">正在加载密钥库…</string>
+    <string name="progress_signing">正在签名（%1$s）…</string>
+    <string name="progress_save_output">正在保存输出文件…</string>
+
+    <!-- 密钥库解析错误 -->
+    <string name="keystore_jceks_unsupported">暂不支持 JCEKS 格式，请先用 keytool 转换为 PKCS12</string>
+    <string name="keystore_invalid_jks">不是有效的 JKS 密钥库文件</string>
+    <string name="keystore_unsupported_jks_version">不支持的 JKS 版本: %1$d</string>
+    <string name="keystore_unknown_entry_type">JKS 条目类型无法识别: %1$d</string>
+    <string name="keystore_parse_cert_failed">解析证书失败: %1$s</string>
+    <string name="keystore_wrong_password_or_corrupt">密钥库密码错误或文件已损坏</string>
+    <string name="keystore_alias_not_private_key">别名不存在或不是私钥条目: %1$s</string>
+    <string name="keystore_unsupported_key_protection">不支持的私钥保护算法: %1$s</string>
+    <string name="keystore_key_data_corrupt">私钥数据损坏</string>
+    <string name="keystore_alias_password_wrong">别名密码错误</string>
+    <string name="keystore_missing_cert_chain">条目缺少证书链: %1$s</string>
+    <string name="keystore_file_too_small">文件太小，不是有效的密钥库</string>
+    <string name="keystore_load_failed">无法加载密钥库（格式不支持或密码错误）: %1$s</string>
+    <string name="keystore_unknown_error">密钥库处理失败: %1$s</string>
+</resources>

@@ -88,5 +88,44 @@
     <string name="generate_success">生成成功</string>
     <string name="generate_failed">生成失败: %1$s</string>
     <string name="field_required">此项必填</string>
-    <string name="generating">正在生成密钥...</string>
+    <string name="generating">正在生成密钥…</string>
+
+    <!-- 日志与通用错误 -->
+    <string name="log_start_sign">开始签名: %1$s → 密钥[%2$s]</string>
+    <string name="error_read_apk">无法读取所选 APK</string>
+    <string name="error_write_output">无法写入输出文件</string>
+    <string name="error_keystore_file_missing">密钥库文件丢失，请重新导入</string>
+    <string name="error_open_input_failed">无法读取所选文件</string>
+    <string name="error_open_output_failed">无法写入所选文件</string>
+
+    <!-- 签名进度 -->
+    <string name="progress_read_apk">正在读取 APK…</string>
+    <string name="progress_load_keystore">正在加载密钥库…</string>
+    <string name="progress_signing">正在签名（%1$s）…</string>
+    <string name="progress_save_output">正在保存输出文件…</string>
+
+    <!-- 密钥库解析错误 -->
+    <string name="keystore_jceks_unsupported">暂不支持 JCEKS 格式，请先用 keytool 转换为 PKCS12</string>
+    <string name="keystore_invalid_jks">不是有效的 JKS 密钥库文件</string>
+    <string name="keystore_unsupported_jks_version">不支持的 JKS 版本: %1$d</string>
+    <string name="keystore_unknown_entry_type">JKS 条目类型无法识别: %1$d</string>
+    <string name="keystore_parse_cert_failed">解析证书失败: %1$s</string>
+    <string name="keystore_wrong_password_or_corrupt">密钥库密码错误或文件已损坏</string>
+    <string name="keystore_alias_not_private_key">别名不存在或不是私钥条目: %1$s</string>
+    <string name="keystore_unsupported_key_protection">不支持的私钥保护算法: %1$s</string>
+    <string name="keystore_key_data_corrupt">私钥数据损坏</string>
+    <string name="keystore_alias_password_wrong">别名密码错误</string>
+    <string name="keystore_missing_cert_chain">条目缺少证书链: %1$s</string>
+    <string name="keystore_file_too_small">文件太小，不是有效的密钥库</string>
+    <string name="keystore_load_failed">无法加载密钥库（格式不支持或密码错误）: %1$s</string>
+    <string name="keystore_unknown_error">密钥库处理失败: %1$s</string>
+
+    <!-- 不随语言变化的格式模板 -->
+    <string name="apk_name_unknown" translatable="false">unknown.apk</string>
+    <string name="apk_info_with_size" translatable="false">%1$s (%2$.2f MB)</string>
+    <string name="keystore_spinner_item" translatable="false">%1$s [%2$s]</string>
+    <string name="keystore_item_detail" translatable="false">%1$s | %2$s | %3$s</string>
+    <string name="sign_result_two_lines" translatable="false">%1$s\n%2$s</string>
+    <string name="keystore_default_name" translatable="false">keystore</string>
+    <string name="default_validity_years" translatable="false">30</string>
 </resources>

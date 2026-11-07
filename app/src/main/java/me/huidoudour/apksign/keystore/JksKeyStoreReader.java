@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -17,6 +16,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import me.huidoudour.apksign.R;
+import me.huidoudour.apksign.i18n.LocalizedException;
 
 /**
  * 纯 Java 实现的 JKS 密钥库读取器（只读）。
@@ -49,20 +51,20 @@ public class JksKeyStoreReader {
         DataInputStream in = new DataInputStream(new ByteArrayInputStream(data));
         int magic = in.readInt();
         if (magic == MAGIC_JCEKS) {
-            throw new IOException("暂不支持 JCEKS 格式，请先用 keytool 转换为 PKCS12");
+            throw new LocalizedException(R.string.keystore_jceks_unsupported);
         }
         if (magic != MAGIC_JKS) {
-            throw new IOException("不是有效的 JKS 密钥库文件");
+            throw new LocalizedException(R.string.keystore_invalid_jks);
         }
         int version = in.readInt();
         if (version != 1 && version != 2) {
-            throw new IOException("不支持的 JKS 版本: " + version);
+            throw new LocalizedException(R.string.keystore_unsupported_jks_version, version);
         }
         CertificateFactory cf;
         try {
             cf = CertificateFactory.getInstance("X.509");
         } catch (Exception e) {
-            throw new IOException(e);
+            throw new LocalizedException(e, R.string.keystore_unknown_error, e.getMessage());
         }
 
         int count = in.readInt();
@@ -88,12 +90,12 @@ public class JksKeyStoreReader {
                     entry.chain = new ArrayList<>(1);
                     entry.chain.add(readCert(in, cf, version));
                 } else {
-                    throw new IOException("JKS 条目类型无法识别: " + tag);
+                    throw new LocalizedException(R.string.keystore_unknown_entry_type, tag);
                 }
                 reader.entries.put(alias, entry);
             }
         } catch (java.security.cert.CertificateException e) {
-            throw new IOException("解析证书失败: " + e.getMessage(), e);
+            throw new LocalizedException(e, R.string.keystore_parse_cert_failed, e.getMessage());
         }
 
         // 尾部 20 字节为 SHA1(password_utf16be + "Mighty Aphrodite" + 前面全部内容)
@@ -106,10 +108,10 @@ public class JksKeyStoreReader {
                 md.update(MIGHTY_APHRODITE);
                 md.update(data, 0, data.length - 20);
                 if (!MessageDigest.isEqual(md.digest(), actual)) {
-                    throw new IOException("密钥库密码错误或文件已损坏");
+                    throw new LocalizedException(R.string.keystore_wrong_password_or_corrupt);
                 }
             } catch (java.security.NoSuchAlgorithmException e) {
-                throw new IOException(e);
+                throw new LocalizedException(e, R.string.keystore_unknown_error, e.getMessage());
             }
         }
         return reader;
@@ -144,15 +146,15 @@ public class JksKeyStoreReader {
     public PrivateKey getPrivateKey(String alias, char[] keyPassword) throws Exception {
         Entry e = entries.get(alias);
         if (e == null || !e.isKeyEntry) {
-            throw new UnrecoverableKeyException("别名不存在或不是私钥条目: " + alias);
+            throw new LocalizedException(R.string.keystore_alias_not_private_key, alias);
         }
         EncryptedPrivateKeyInfo epki = EncryptedPrivateKeyInfo.getInstance(e.protectedKey);
         String algOid = epki.getEncryptionAlgorithm().getAlgorithm().getId();
         if (!SUN_KEY_PROTECTOR_OID.equals(algOid)) {
-            throw new UnrecoverableKeyException("不支持的私钥保护算法: " + algOid);
+            throw new LocalizedException(R.string.keystore_unsupported_key_protection, algOid);
         }
         byte[] data = epki.getEncryptedData();
-        if (data.length < 40) throw new UnrecoverableKeyException("私钥数据损坏");
+        if (data.length < 40) throw new LocalizedException(R.string.keystore_key_data_corrupt);
 
         byte[] passwd = passwordBytes(keyPassword);
         byte[] salt = new byte[20];
@@ -178,7 +180,7 @@ public class JksKeyStoreReader {
         byte[] check = md.digest();
         for (int i = 0; i < 20; i++) {
             if (check[i] != data[data.length - 20 + i]) {
-                throw new UnrecoverableKeyException("别名密码错误");
+                throw new LocalizedException(R.string.keystore_alias_password_wrong);
             }
         }
 

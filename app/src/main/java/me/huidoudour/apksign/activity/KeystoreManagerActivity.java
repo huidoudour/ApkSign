@@ -45,6 +45,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import me.huidoudour.apksign.R;
+import me.huidoudour.apksign.i18n.LocalizedException;
 import me.huidoudour.apksign.keystore.BuiltinTestKey;
 import me.huidoudour.apksign.keystore.KeyGenHelper;
 import me.huidoudour.apksign.keystore.KeystoreConfig;
@@ -212,7 +213,7 @@ public class KeystoreManagerActivity extends AppCompatActivity {
             File temp = new File(getCacheDir(), "import_" + System.currentTimeMillis());
             try (InputStream in = getContentResolver().openInputStream(uri);
                  OutputStream out = new FileOutputStream(temp)) {
-                if (in == null) throw new java.io.IOException("openInputStream failed");
+                if (in == null) throw new LocalizedException(R.string.error_open_input_failed);
                 byte[] buf = new byte[8192];
                 int n;
                 while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
@@ -311,7 +312,7 @@ public class KeystoreManagerActivity extends AppCompatActivity {
         if (uri == null || pendingExportConfig == null) return;
         try (InputStream in = new FileInputStream(repository.getKeystoreFile(pendingExportConfig));
              OutputStream out = getContentResolver().openOutputStream(uri, "wt")) {
-            if (out == null) throw new java.io.IOException("openOutputStream failed");
+            if (out == null) throw new LocalizedException(R.string.error_open_output_failed);
             byte[] buf = new byte[8192];
             int n;
             while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
@@ -336,8 +337,8 @@ public class KeystoreManagerActivity extends AppCompatActivity {
                 .show();
     }
 
-    private static String briefMessage(Exception e) {
-        return e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+    private String briefMessage(Exception e) {
+        return LocalizedException.describe(this, e);
     }
 
     private String queryDisplayName(Uri uri) {
@@ -348,7 +349,7 @@ public class KeystoreManagerActivity extends AppCompatActivity {
             }
         } catch (Exception ignored) {
         }
-        return "keystore";
+        return getString(R.string.keystore_default_name);
     }
 
     // ─────────────────────────── 列表 ───────────────────────────
@@ -368,7 +369,8 @@ public class KeystoreManagerActivity extends AppCompatActivity {
             holder.tvName.setText(config.name);
             String date = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
                     .format(new Date(config.createdAt));
-            holder.tvDetail.setText(config.type + " | " + config.keyAlias + " | " + date);
+            holder.tvDetail.setText(getString(R.string.keystore_item_detail,
+                    config.type, config.keyAlias, date));
             holder.btnExport.setOnClickListener(v -> {
                 pendingExportConfig = config;
                 exportLauncher.launch(config.fileName);

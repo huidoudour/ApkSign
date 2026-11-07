@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Locale;
 
 import me.huidoudour.apksign.R;
+import me.huidoudour.apksign.i18n.LocalizedException;
 import me.huidoudour.apksign.keystore.KeystoreConfig;
 import me.huidoudour.apksign.keystore.KeystoreRepository;
 import me.huidoudour.apksign.signer.ApkSignTask;
@@ -194,11 +195,10 @@ public class MainActivity extends AppCompatActivity {
             }
         } catch (Exception ignored) {
         }
-        apkDisplayName = name != null ? name : "unknown.apk";
-        String info = apkDisplayName;
-        if (size >= 0) {
-            info += String.format(Locale.getDefault(), " (%.2f MB)", size / 1048576.0);
-        }
+        apkDisplayName = name != null ? name : getString(R.string.apk_name_unknown);
+        String info = size >= 0
+                ? getString(R.string.apk_info_with_size, apkDisplayName, size / 1048576.0)
+                : apkDisplayName;
         tvApkInfo.setText(info);
     }
 
@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
         configs = repository.loadAll();
         List<String> names = new ArrayList<>();
         for (KeystoreConfig c : configs) {
-            names.add(c.name + " [" + c.keyAlias + "]");
+            names.add(getString(R.string.keystore_spinner_item, c.name, c.keyAlias));
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_item, names);
@@ -305,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
         btnInstall.setVisibility(View.GONE);
 
         setBusy(true);
-        appendLog("开始签名: " + apkDisplayName + " → 密钥[" + config.name + "]");
+        appendLog(getString(R.string.log_start_sign, apkDisplayName, config.name));
         ApkSignTask.run(this, apkUri, config,
                 cbV1.isChecked(), cbV2.isChecked(), cbV3.isChecked(),
                 outputUri, outputFile, new ApkSignTask.Callback() {
@@ -345,7 +345,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         setBusy(false);
                         String msg = getString(R.string.sign_failed,
-                                error.getMessage() != null ? error.getMessage() : error.toString());
+                                LocalizedException.describe(MainActivity.this, error));
                         appendLog(msg);
                         Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
                     }
