@@ -74,8 +74,14 @@ public class KeystoreRepository {
      * 返回列表是否发生变化（需要写回）。
      */
     private boolean ensureBuiltinTestKey(List<KeystoreConfig> list) {
+        String displayName = appContext.getString(R.string.builtin_testkey_name);
         for (KeystoreConfig c : list) {
             if (BuiltinTestKey.CONFIG_ID.equals(c.id) && getKeystoreFile(c).exists()) {
+                // 名称随当前语言刷新，历史配置也能显示最新文案
+                if (!displayName.equals(c.name)) {
+                    c.name = displayName;
+                    return true;
+                }
                 return false;
             }
         }
@@ -88,7 +94,7 @@ public class KeystoreRepository {
             return false;
         }
         KeystoreConfig builtin = KeystoreConfig.create(
-                appContext.getString(R.string.builtin_testkey_name),
+                displayName,
                 BuiltinTestKey.FILE_NAME, KeystoreHelper.TYPE_PKCS12,
                 BuiltinTestKey.PASSWORD, BuiltinTestKey.ALIAS, BuiltinTestKey.PASSWORD);
         builtin.id = BuiltinTestKey.CONFIG_ID;

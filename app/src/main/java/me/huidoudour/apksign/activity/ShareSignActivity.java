@@ -25,6 +25,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.IntentCompat;
+import androidx.core.widget.TextViewCompat;
 
 import com.google.android.material.color.MaterialColors;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -72,7 +74,7 @@ public class ShareSignActivity extends AppCompatActivity {
         repository = new KeystoreRepository(this);
 
         apkUri = Intent.ACTION_SEND.equals(getIntent().getAction())
-                ? getIntent().getParcelableExtra(Intent.EXTRA_STREAM)
+                ? IntentCompat.getParcelableExtra(getIntent(), Intent.EXTRA_STREAM, Uri.class)
                 : getIntent().getData();
         if (apkUri == null) {
             Toast.makeText(this, R.string.share_sign_read_failed, Toast.LENGTH_LONG).show();
@@ -143,14 +145,14 @@ public class ShareSignActivity extends AppCompatActivity {
 
         // APK 名称与大小
         TextView tvApk = new TextView(this);
-        tvApk.setTextAppearance(
+        TextViewCompat.setTextAppearance(tvApk,
                 com.google.android.material.R.style.TextAppearance_Material3_BodyMedium);
         tvApk.setText(resolveApkInfo());
         root.addView(tvApk);
 
         // 密钥选择
         TextView tvKeyLabel = new TextView(this);
-        tvKeyLabel.setTextAppearance(
+        TextViewCompat.setTextAppearance(tvKeyLabel,
                 com.google.android.material.R.style.TextAppearance_Material3_LabelMedium);
         tvKeyLabel.setText(R.string.title_keystore);
         LinearLayout.LayoutParams labelParams = wrapParams();
@@ -205,7 +207,7 @@ public class ShareSignActivity extends AppCompatActivity {
         root.addView(progress, progressParams);
 
         tvStatus = new TextView(this);
-        tvStatus.setTextAppearance(
+        TextViewCompat.setTextAppearance(tvStatus,
                 com.google.android.material.R.style.TextAppearance_Material3_BodySmall);
         tvStatus.setVisibility(View.GONE);
         LinearLayout.LayoutParams statusParams = wrapParams();

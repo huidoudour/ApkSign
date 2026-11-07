@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.widget.TextViewCompat;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -122,13 +123,13 @@ public class InstallerPickerDialog {
             root.addView(textColumn, textParams);
 
             TextView label = new TextView(getContext());
-            label.setTextAppearance(
+            TextViewCompat.setTextAppearance(label,
                     com.google.android.material.R.style.TextAppearance_Material3_BodyLarge);
             label.setSingleLine(true);
             textColumn.addView(label);
 
             TextView packageName = new TextView(getContext());
-            packageName.setTextAppearance(
+            TextViewCompat.setTextAppearance(packageName,
                     com.google.android.material.R.style.TextAppearance_Material3_BodySmall);
             packageName.setSingleLine(true);
             textColumn.addView(packageName);

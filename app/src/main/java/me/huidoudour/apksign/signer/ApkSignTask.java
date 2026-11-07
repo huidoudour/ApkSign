@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.android.apksig.ApkSigner;
+import com.android.apksig.KeyConfig;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -77,7 +78,8 @@ public class ApkSignTask {
                 post(callback, app.getString(R.string.progress_signing,
                         schemesLabel(app, v1, v2, v3)));
                 ApkSigner.SignerConfig signerConfig = new ApkSigner.SignerConfig.Builder(
-                        config.keyAlias, identity.privateKey, identity.certificates).build();
+                        config.keyAlias, new KeyConfig.Jca(identity.privateKey),
+                        identity.certificates).build();
                 ApkSigner signer = new ApkSigner.Builder(Collections.singletonList(signerConfig))
                         .setInputApk(inFile)
                         .setOutputApk(outFile)

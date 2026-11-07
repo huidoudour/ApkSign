@@ -56,7 +56,7 @@
     <string name="action_delete">Delete</string>
     <string name="delete_confirm_title">Delete signing key</string>
     <string name="delete_confirm_msg">Delete \"%1$s\"? The keystore file in the private directory will be deleted as well. This cannot be undone.</string>
-    <string name="builtin_testkey_name">TestKey (public test key)</string>
+    <string name="builtin_testkey_name">Default key [default]</string>
     <string name="export_success">Exported</string>
     <string name="export_failed">Export failed: %1$s</string>
 
