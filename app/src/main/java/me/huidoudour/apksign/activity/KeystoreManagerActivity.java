@@ -2,6 +2,7 @@ package me.huidoudour.apksign.activity;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -46,7 +47,6 @@ import java.util.concurrent.Executors;
 
 import me.huidoudour.apksign.R;
 import me.huidoudour.apksign.i18n.LocalizedException;
-import me.huidoudour.apksign.keystore.BuiltinTestKey;
 import me.huidoudour.apksign.keystore.KeyGenHelper;
 import me.huidoudour.apksign.keystore.KeystoreConfig;
 import me.huidoudour.apksign.keystore.KeystoreHelper;
@@ -55,6 +55,9 @@ import me.huidoudour.apksign.keystore.KeystoreRepository;
 public class KeystoreManagerActivity extends AppCompatActivity {
 
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
+
+    /** 自有文件管理器包名：优先调起它的 Picker 模式选取密钥库 */
+    private static final String FILE_MANAGER_PACKAGE = "me.huidoudour.file.manager";
 
     private KeystoreRepository repository;
     private final List<KeystoreConfig> configs = new ArrayList<>();
@@ -65,11 +68,11 @@ public class KeystoreManagerActivity extends AppCompatActivity {
     private File pendingImportFile;          // 已拷贝到 cache 的待导入文件
     private String pendingImportName;        // 原始文件名
     private TextView tvImportFileName;
-    private ActivityResultLauncher<String[]> pickKeystoreLauncher;
+    private ActivityResultLauncher<Intent> pickKeystoreLauncher;
 
-    // 导出状态
+    // 导出状态（优先 FileManager 保存，未支持则回退系统 SAF）
     private KeystoreConfig pendingExportConfig;
-    private ActivityResultLauncher<String> exportLauncher;
+    private ActivityResultLauncher<Intent> exportLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,10 +98,19 @@ public class KeystoreManagerActivity extends AppCompatActivity {
         recycler.setAdapter(adapter);
 
         pickKeystoreLauncher = registerForActivityResult(
-                new ActivityResultContracts.OpenDocument(), this::onKeystoreFilePicked);
+                new ActivityResultContracts.StartActivityForResult(), result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        onKeystoreFilePicked(result.getData().getData());
+                    }
+                });
         exportLauncher = registerForActivityResult(
-                new ActivityResultContracts.CreateDocument("application/octet-stream"),
-                this::onExportTargetCreated);
+                new ActivityResultContracts.StartActivityForResult(), result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        onExportTargetCreated(result.getData().getData());
+                    } else {
+                        pendingExportConfig = null;
+                    }
+                });
 
         findViewById(R.id.fab_add).setOnClickListener(v -> showAddChoiceDialog());
 
@@ -138,7 +150,7 @@ public class KeystoreManagerActivity extends AppCompatActivity {
         pendingImportName = null;
 
         view.findViewById(R.id.btn_pick_file).setOnClickListener(v ->
-                pickKeystoreLauncher.launch(new String[]{"*/*"}));
+                pickKeystoreLauncher.launch(buildPickKeystoreIntent()));
 
         final KeystoreHelper.Loaded[] loadedHolder = new KeystoreHelper.Loaded[1];
         view.findViewById(R.id.btn_load_aliases).setOnClickListener(v -> {
@@ -204,6 +216,23 @@ public class KeystoreManagerActivity extends AppCompatActivity {
                 tvLoadResult.setText(getString(R.string.import_verify_failed, briefMessage(e)));
             }
         });
+    }
+
+    /** 优先调起自有 FileManager 选取密钥库文件；未安装则回退系统 SAF */
+    private Intent buildPickKeystoreIntent() {
+        Intent fmIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        fmIntent.addCategory(Intent.CATEGORY_OPENABLE);
+        fmIntent.setType("*/*");
+        fmIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        fmIntent.setPackage(FILE_MANAGER_PACKAGE);
+        if (fmIntent.resolveActivity(getPackageManager()) != null) {
+            return fmIntent;
+        }
+        // FileManager 未安装，回退到系统 SAF 文件选择器
+        Intent safIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        safIntent.addCategory(Intent.CATEGORY_OPENABLE);
+        safIntent.setType("*/*");
+        return safIntent;
     }
 
     private void onKeystoreFilePicked(Uri uri) {
@@ -308,8 +337,34 @@ public class KeystoreManagerActivity extends AppCompatActivity {
 
     // ─────────────────────────── 导出 / 删除 ───────────────────────────
 
+    /**
+     * 优先调起自有 FileManager 创建导出文件；未声明 CREATE_DOCUMENT 或未安装时回退系统 SAF。
+     */
+    private Intent buildExportKeystoreIntent(String fileName) {
+        Intent fmIntent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        fmIntent.addCategory(Intent.CATEGORY_OPENABLE);
+        fmIntent.setType("application/octet-stream");
+        fmIntent.putExtra(Intent.EXTRA_TITLE, fileName);
+        fmIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        fmIntent.setPackage(FILE_MANAGER_PACKAGE);
+        if (fmIntent.resolveActivity(getPackageManager()) != null) {
+            return fmIntent;
+        }
+        // FileManager 未安装或未提供保存入口，回退到系统 SAF 保存面板
+        Intent safIntent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        safIntent.addCategory(Intent.CATEGORY_OPENABLE);
+        safIntent.setType("application/octet-stream");
+        safIntent.putExtra(Intent.EXTRA_TITLE, fileName);
+        return safIntent;
+    }
+
     private void onExportTargetCreated(Uri uri) {
-        if (uri == null || pendingExportConfig == null) return;
+        if (pendingExportConfig == null) return;
+        if (uri == null) {
+            // 用户取消保存，清理待导出状态
+            pendingExportConfig = null;
+            return;
+        }
         try (InputStream in = new FileInputStream(repository.getKeystoreFile(pendingExportConfig));
              OutputStream out = getContentResolver().openOutputStream(uri, "wt")) {
             if (out == null) throw new LocalizedException(R.string.error_open_output_failed);
@@ -369,15 +424,16 @@ public class KeystoreManagerActivity extends AppCompatActivity {
             holder.tvName.setText(config.name);
             String date = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
                     .format(new Date(config.createdAt));
-            holder.tvDetail.setText(getString(R.string.keystore_item_detail,
-                    config.type, config.keyAlias, date));
+            // 内置默认密钥不展示内部别名 testkey
+            holder.tvDetail.setText(config.isBuiltin()
+                    ? getString(R.string.keystore_item_detail_no_alias, config.type, date)
+                    : getString(R.string.keystore_item_detail, config.type, config.keyAlias, date));
             holder.btnExport.setOnClickListener(v -> {
                 pendingExportConfig = config;
-                exportLauncher.launch(config.fileName);
+                exportLauncher.launch(buildExportKeystoreIntent(config.fileName));
             });
-            // 内置公开 testkey 会自动恢复，不提供删除入口
-            holder.btnDelete.setVisibility(
-                    BuiltinTestKey.CONFIG_ID.equals(config.id) ? View.GONE : View.VISIBLE);
+            // 内置默认密钥会自动恢复，不提供删除入口
+            holder.btnDelete.setVisibility(config.isBuiltin() ? View.GONE : View.VISIBLE);
             holder.btnDelete.setOnClickListener(v -> confirmDelete(config));
         }
 

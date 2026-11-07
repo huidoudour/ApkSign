@@ -20,6 +20,11 @@ public class KeystoreConfig {
     public String keyPassword;   // 别名密码
     public long createdAt;
 
+    /** 内置默认密钥：别名 testkey 属于内部实现，界面上不展示 */
+    public boolean isBuiltin() {
+        return BuiltinTestKey.CONFIG_ID.equals(id);
+    }
+
     public static KeystoreConfig create(String name, String fileName, String type,
                                         String storePassword, String keyAlias, String keyPassword) {
         KeystoreConfig c = new KeystoreConfig();

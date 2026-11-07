@@ -206,7 +206,10 @@ public class MainActivity extends AppCompatActivity {
         configs = repository.loadAll();
         List<String> names = new ArrayList<>();
         for (KeystoreConfig c : configs) {
-            names.add(getString(R.string.keystore_spinner_item, c.name, c.keyAlias));
+            // 内置默认密钥不展示内部别名 testkey
+            names.add(c.isBuiltin()
+                    ? c.name
+                    : getString(R.string.keystore_spinner_item, c.name, c.keyAlias));
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_item, names);

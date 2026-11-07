@@ -125,6 +125,7 @@
     <string name="apk_info_with_size" translatable="false">%1$s (%2$.2f MB)</string>
     <string name="keystore_spinner_item" translatable="false">%1$s [%2$s]</string>
     <string name="keystore_item_detail" translatable="false">%1$s | %2$s | %3$s</string>
+    <string name="keystore_item_detail_no_alias" translatable="false">%1$s | %2$s</string>
     <string name="sign_result_two_lines" translatable="false">%1$s\n%2$s</string>
     <string name="keystore_default_name" translatable="false">keystore</string>
     <string name="default_validity_years" translatable="false">30</string>
